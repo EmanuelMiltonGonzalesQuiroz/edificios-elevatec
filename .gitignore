@@ -1,4 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files. //gsutil cors set cors.json gs://edificios-elevatec.appspot.com
 
 # dependencies
 /node_modules

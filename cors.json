@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:3000", "edificios-elevatec.web.app", "edificios-elevatec.firebaseapp.com"], 
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  }
+]
+
