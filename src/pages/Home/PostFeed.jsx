@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../connection/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Carousel } from 'react-responsive-carousel';
-import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaHome, FaDollarSign } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import PostDetailsModal from './PostDetailsModal';
 
 const PostFeed = ({ filters }) => {
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedPublication, setSelectedPublication] = useState(null);
 
   useEffect(() => {
     const fetchPublications = async () => {
@@ -53,7 +54,15 @@ const PostFeed = ({ filters }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {publications.map((pub) => (
-            <div key={pub.id} className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl">
+            <div
+              key={pub.id}
+              onClick={(e) => {
+                if (!e.target.closest('.carousel-root')) {
+                  setSelectedPublication(pub);
+                }
+              }}
+              className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl cursor-pointer"
+            >
               <h3 className="text-xl font-bold mb-2 text-gray-800">{pub.name}</h3>
               <div className="flex items-center space-x-2 text-gray-600 mb-1">
                 <FaDollarSign />
@@ -67,31 +76,19 @@ const PostFeed = ({ filters }) => {
                 <FaHome />
                 <p>Tipo: {pub.transactionType}</p>
               </div>
-              <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                <p>Área: {pub.area} m²</p>
-              </div>
-              <p className="text-gray-500 text-sm mb-2">Publicado el {pub.uploadedAt}</p>
-
-              <a
-                href={`https://wa.me/${pub.contact}?text=Hola, estoy interesado/a en el inmueble "${pub.name}". Descripción: ${pub.description}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center mt-3 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition"
-              >
-                <FaWhatsapp className="mr-2" /> Contactar por WhatsApp
-              </a>
 
               {pub.imageUrls && pub.imageUrls.length > 0 && (
                 <Carousel
                   showThumbs={false}
+                  showIndicators={false}
+                  showStatus={false} // Oculta el "N of M"
                   dynamicHeight={true}
                   infiniteLoop={true}
-                  className="mt-4 max-h-60 min-h-60 rounded-lg overflow-hidden"
-                  onClickItem={(index) => setSelectedImage(pub.imageUrls[index])}
+                  className="mt-4 max-h-60 min-h-60 rounded-lg overflow-hidden carousel-root"
                 >
-                  {pub.imageUrls.map((url, index) => (
-                    <div key={index} className="cursor-pointer">
-                      <img src={url} alt={`Imagen ${index + 1}`} className="object-cover rounded-lg max-h-60 min-h-60" />
+                  {pub.imageUrls.map((url) => (
+                    <div key={url} className="cursor-pointer">
+                      <img src={url} alt="Imagen de la publicación" className="object-cover rounded-lg max-h-60 min-h-60" />
                     </div>
                   ))}
                 </Carousel>
@@ -101,15 +98,9 @@ const PostFeed = ({ filters }) => {
         </div>
       )}
 
-      {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50" onClick={() => setSelectedImage(null)}>
-          <div className="max-w-3xl w-full p-4 relative">
-            <button onClick={() => setSelectedImage(null)} className="absolute top-2 right-2 text-white text-3xl">
-              &times;
-            </button>
-            <img src={selectedImage} alt="Imagen ampliada" className="object-cover rounded-lg max-h-[80vh] w-full shadow-lg" />
-          </div>
-        </div>
+      {/* Modal de detalles de la publicación */}
+      {selectedPublication && (
+        <PostDetailsModal publication={selectedPublication} onClose={() => setSelectedPublication(null)} />
       )}
     </div>
   );

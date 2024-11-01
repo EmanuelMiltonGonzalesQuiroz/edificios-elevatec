@@ -5,8 +5,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-60 flex justify-center items-center text-black  z-50">
-      <div className="bg-white rounded-lg overflow-auto max-h-[90vh] max-w-[90vw]  p-6 relative shadow-lg">
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-60 flex justify-center items-center text-black z-50 w-screen h-screen">
+      <div className="bg-white rounded-lg overflow-auto max-h-[90vh] max-w-[90vw] p-6 relative shadow-lg">
         {/* Header con título y botón de cerrar */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">{title}</h2>

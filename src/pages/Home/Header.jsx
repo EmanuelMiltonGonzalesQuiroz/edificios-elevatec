@@ -1,77 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 import logo from '../../assets/images/COTA LOGO/elevatec_logo_sin_fondo.png';
-import { useAuth } from '../../context/AuthContext';
-import { homeText } from '../../components/common/Text/texts';
-import { FaUserCircle, FaPlus, FaFilter, FaTimesCircle, FaSignOutAlt } from 'react-icons/fa'; // Importamos el icono de cerrar sesión
+import { FaBars, FaFilter, FaTimesCircle } from 'react-icons/fa';
 import OpenModalButton from '../../components/UI/OpenModalButton';
-import Profile from './Profile';
-import CreateAd from './CreateAd';
 import Filters from './Filters';
+import MenuSidebar from './MenuSidebar'; // Importamos el nuevo componente de menú
 
 const Header = ({ onApplyFilters, onClearFilters }) => {
-  const { logout } = useAuth();
-  const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const userEmail = user ? user.email : 'Email';
-
-  const handleLogout = () => {
-    logout();
-    window.location.href = '/login';
-  };
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <>
-      <header className="bg-gradient-to-r from-orange-500 to-yellow-600 text-white flex justify-between items-center px-6 py-4 shadow-md overflow-auto">
+      <header className="bg-gradient-to-r from-orange-500 to-yellow-600 text-white flex justify-between items-center px-6 py-4 shadow-md">
         <div className="flex items-center space-x-4">
           <img src={logo} alt="Logo" className="w-28" />
         </div>
-        
-        <div className="flex items-center space-x-4">
-          <OpenModalButton
-            icon={FaUserCircle}
-            buttonText={<span className="hidden md:inline">{userEmail}</span>} // Solo muestra texto en md o superior
-            modalContent={Profile}
-            title="Perfil de Usuario"
-            className="flex items-center space-x-2"
-          />
 
-          <OpenModalButton
-            icon={FaPlus}
-            buttonText={<span className="hidden md:inline">Publicar Anuncio</span>}
-            modalContent={CreateAd}
-            title="Crear Nuevo Anuncio"
-            className="flex items-center space-x-2 bg-blue-600 py-2 px-4 rounded-md hover:bg-blue-700 transition"
-          />
-
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-2 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition"
-          >
-            <FaSignOutAlt />
-            <span className="hidden md:inline">{homeText.logoutButton}</span> {/* Solo muestra texto en md o superior */}
-          </button>
-        </div>
+        {/* Botón de menú para abrir el sidebar */}
+        <button
+          onClick={() => setIsMenuOpen(true)}
+          className="text-2xl focus:outline-none"
+        >
+          <FaBars />
+        </button>
       </header>
 
+      {/* Barra de filtros */}
       <div className="bg-gray-600 py-2 shadow-inner">
         <div className="container mx-auto flex justify-center gap-4">
+          {/* Botón de Filtros */}
           <OpenModalButton
             icon={FaFilter}
-            buttonText={<span className="hidden md:inline">Filtros</span>}
+            buttonText={<span className="md:inline">Filtros</span>}
             modalContent={() => <Filters onApplyFilters={onApplyFilters} />}
             title="Filtros de Búsqueda"
-            className="flex items-center space-x-2 bg-white text-black py-2 px-4 rounded-md hover:bg-gray-100 transition"
+            className="flex items-center space-x-2 bg-blue-500 py-2 px-4 rounded-md hover:bg-gray-100 transition w-full max-w-xs"
           />
           
+          {/* Botón de Quitar Filtros */}
           <button
             onClick={onClearFilters}
-            className="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition"
+            className="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition w-full max-w-xs"
           >
             <FaTimesCircle />
-            <span className="hidden md:inline">Quitar Filtros</span> {/* Solo muestra texto en md o superior */}
+            <span className="md:inline">Quitar Filtros</span>
           </button>
         </div>
       </div>
+
+      {/* Sidebar de menú */}
+      <MenuSidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </>
   );
 };
