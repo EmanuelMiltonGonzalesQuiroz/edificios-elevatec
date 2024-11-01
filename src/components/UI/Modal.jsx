@@ -1,11 +1,12 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { FaTimes } from 'react-icons/fa';
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-60 flex justify-center items-center text-black z-50 w-screen h-screen">
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-60 flex justify-center items-center text-black z-50">
       <div className="bg-white rounded-lg overflow-auto max-h-[90vh] max-w-[90vw] p-6 relative shadow-lg">
         {/* Header con título y botón de cerrar */}
         <div className="flex justify-between items-center mb-4">
@@ -17,23 +18,24 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             <FaTimes size={16} />
           </button>
         </div>
-        
+
         {/* Contenido del modal */}
         <div className="mb-4">
           {children}
         </div>
 
         {/* Botón de Cancelar */}
-        <div className="flex justify-end">
+        <div className="flex ">
           <button
             onClick={onClose}
-            className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 transition"
+            className="bg-gray-300 w-full text-gray-700 py-2 px-4 rounded hover:bg-gray-400 transition"
           >
-            Cancelar
+            Cerrar
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../connection/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  
   const [profileData, setProfileData] = useState({
     username: '',
     email: '',
@@ -17,9 +20,14 @@ const Profile = () => {
   const [password, setPassword] = useState('');
   const [isPasswordChanging, setIsPasswordChanging] = useState(false);
 
+
   useEffect(() => {
+    if (!currentUser) {
+      navigate('/login');
+      return; // Se asegura de detener la ejecución si no hay usuario
+    }
+
     const fetchUserProfile = async () => {
-      if (!currentUser) return;
       const userDoc = doc(db, 'users', currentUser.uid);
       const docSnapshot = await getDoc(userDoc);
       if (docSnapshot.exists()) {
@@ -34,8 +42,9 @@ const Profile = () => {
         setHasPassword(!!data.password);
       }
     };
+    
     fetchUserProfile();
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +69,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="p-4 min-w-[30vw]">
+    <div className="p-4 min-w-[30vw] max-w-[90vw]">
       <div className="space-y-4">
         <div>
           <label className="block font-semibold text-gray-700">Nombre de Usuario:</label>

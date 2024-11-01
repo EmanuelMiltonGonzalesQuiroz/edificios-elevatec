@@ -46,7 +46,7 @@ const Filters = ({ onApplyFilters }) => {
           <input type="number" name="areaMin" placeholder="Mínimo" onChange={handleChange} className="w-1/2 p-2 border rounded" />
           <input type="number" name="areaMax" placeholder="Máximo" onChange={handleChange} className="w-1/2 p-2 border rounded" />
         </div>
-        <button onClick={applyFilters} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition mt-4">
+        <button onClick={applyFilters} className="bg-blue-600 text-white py-2 w-full px-4 rounded hover:bg-blue-700 transition mt-4">
           Buscar
         </button>
       </div>

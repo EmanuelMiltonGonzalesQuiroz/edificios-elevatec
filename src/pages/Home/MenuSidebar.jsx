@@ -1,8 +1,9 @@
 import React from 'react';
-import { FaUserCircle, FaPlus, FaSignOutAlt } from 'react-icons/fa';
+import { FaUserCircle, FaPlus, FaSignOutAlt, FaUsers } from 'react-icons/fa';
 import OpenModalButton from '../../components/UI/OpenModalButton';
 import Profile from './Profile';
 import CreateAd from './CreateAd';
+import UserManagement from './UserManagement'; // Importa el modal para gestionar usuarios
 import { useAuth } from '../../context/AuthContext';
 import { homeText } from '../../components/common/Text/texts';
 
@@ -12,12 +13,6 @@ const MenuSidebar = ({ isOpen, onClose }) => {
   const handleLogout = () => {
     logout();
     window.location.href = '/login';
-  };
-
-  const handleProfileClick = () => {
-    if (!currentUser) {
-      window.location.href = '/login';
-    }
   };
 
   return (
@@ -31,15 +26,13 @@ const MenuSidebar = ({ isOpen, onClose }) => {
       </button>
       <div className="p-6 space-y-4">
         {/* Botón de Perfil */}
-        <div onClick={handleProfileClick}>
-          <OpenModalButton
-            icon={FaUserCircle}
-            buttonText="Perfil"
-            modalContent={currentUser ? Profile : null}
-            title="Perfil de Usuario"
-            className="flex items-center space-x-3 text-white bg-gray-500 hover:bg-gray-600 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
-          />
-        </div>
+        <OpenModalButton
+          icon={FaUserCircle}
+          buttonText="Perfil"
+          modalContent={Profile}
+          title="Perfil de Usuario"
+          className="flex items-center space-x-3 text-white bg-gray-500 hover:bg-gray-600 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
+        />
 
         {/* Botón Publicar Anuncio */}
         <OpenModalButton
@@ -50,7 +43,18 @@ const MenuSidebar = ({ isOpen, onClose }) => {
           className="flex items-center space-x-3 text-white bg-gradient-to-r from-blue-500 to-blue-700 hover:bg-blue-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
         />
 
-        {/* Botón de Cerrar Sesión (solo si el usuario está autenticado) */}
+        {/* Botón Usuarios (solo para Administrador) */}
+        {currentUser?.role === 'Administrador' && (
+          <OpenModalButton
+            icon={FaUsers}
+            buttonText="Usuarios"
+            modalContent={UserManagement} // Modal que mostrará la tabla de usuarios
+            title="Gestión de Usuarios"
+            className="flex items-center space-x-3 text-white bg-gradient-to-r from-green-500 to-green-700 hover:bg-green-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
+          />
+        )}
+
+        {/* Botón de Cerrar Sesión */}
         {currentUser && (
           <button
             onClick={handleLogout}

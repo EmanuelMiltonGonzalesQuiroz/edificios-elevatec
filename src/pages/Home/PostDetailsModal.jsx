@@ -2,21 +2,37 @@ import React, { useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBath, FaMap } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import EditButton from '../../components/UI/EditButton';
+import DeleteButton from '../../components/UI/DeleteButton';
+import { useAuth } from '../../context/AuthContext';
 
 const PostDetailsModal = ({ publication, onClose }) => {
+  const { currentUser } = useAuth();
+  const [selectedImage, setSelectedImage] = useState(null);
+
   const whatsappUrl = `https://wa.me/${publication.contact}?text=Hola, estoy interesado/a en el inmueble "${publication.name}". Descripción: ${publication.description}`;
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${publication.latitude},${publication.longitude}`;
-  const [selectedImage, setSelectedImage] = useState(null);
+
+  // Configuración de campos editables para la publicación
+  const editFieldsConfig = [
+    { label: 'Nombre', name: 'name', type: 'input', editable: true, validation: /^[a-zA-Z\s]+$/ },
+    { label: 'Descripción', name: 'description', type: 'textarea', editable: true },
+    { label: 'Monto', name: 'amount', type: 'input', editable: true, validation: /^[0-9]+$/ },
+    { label: 'Ciudad', name: 'city', type: 'input', editable: true },
+    { label: 'Área', name: 'area', type: 'input', editable: true, validation: /^[0-9]+$/ },
+    { label: 'Habitaciones', name: 'rooms', type: 'input', editable: true, validation: /^[0-9]+$/ },
+    { label: 'Baños', name: 'bathrooms', type: 'input', editable: true, validation: /^[0-9]+$/ },
+    { label: 'Tipo de Transacción', name: 'transactionType', type: 'select', options: ['preventa', 'venta', 'alquiler'], editable: true },
+  ];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-5xl w-full flex relative">
         <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 text-2xl">&times;</button>
 
-        {/* Detalles (1/4 de ancho) */}
+        {/* Detalles de la publicación */}
         <div className="w-1/4 p-4 space-y-4 text-left">
           <h3 className="text-2xl font-bold mb-4 text-gray-800">{publication.name}</h3>
-
           <div className="space-y-2">
             <div className="flex items-center space-x-2 text-gray-600">
               <FaDollarSign />
@@ -73,20 +89,29 @@ const PostDetailsModal = ({ publication, onClose }) => {
             >
               <FaMap className="mr-2" /> Ver en Maps
             </a>
+
+            {/* Mostrar botones de edición y eliminación solo para administradores */}
+            {currentUser?.role === 'Administrador' && (
+              <div className="flex space-x-4 mt-4">
+                <EditButton 
+                  publication={publication} 
+                  fieldsConfig={editFieldsConfig} 
+                  collectionName="publications"
+                  onUpdateSuccess={(updatedPublication) => {
+                    // Actualizar estado con la publicación editada (si es necesario)
+                    console.log('Publicación actualizada:', updatedPublication);
+                  }}
+                />
+                <DeleteButton publication={publication} />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Carrusel de Imágenes (3/4 de ancho) */}
+        {/* Carrusel de Imágenes */}
         <div className="w-3/4 p-4">
-          <Carousel
-            showThumbs={false}
-            showIndicators={false}
-            showStatus={false}
-            dynamicHeight={false} 
-            infiniteLoop={true}
-            className="rounded-lg overflow-hidden"
-          >
-            {publication.imageUrls.map((url, index) => (
+          <Carousel showThumbs={false} showIndicators={false} showStatus={false} infiniteLoop={true} className="rounded-lg overflow-hidden">
+            {publication.imageUrls?.map((url, index) => (
               <div key={index} onClick={() => setSelectedImage(url)} className="w-full h-[400px]">
                 <img src={url} alt={`Imagen de la publicación`} className="object-cover w-full h-full" />
               </div>

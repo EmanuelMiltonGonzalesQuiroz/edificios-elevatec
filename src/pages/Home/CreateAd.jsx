@@ -50,7 +50,7 @@ const CreateAd = () => {
     longitude: '',
     state: 'active',
     uploadedAt: new Date().toISOString().split('T')[0],
-    uploadedBy: currentUser?.id || '',
+    uploadedBy: currentUser?.uid || '',
     deletedBy: '',
   });
 
@@ -125,7 +125,7 @@ const CreateAd = () => {
   );
 
   return (
-    <div className="p-4 min-w-[40vw] max-w-[60vw] mx-auto bg-white rounded-lg shadow-lg">
+    <div className="p-4 min-w-[40vw] max-w-[90vw] mx-auto bg-white rounded-lg shadow-lg">
       <form onSubmit={handleSubmit} className="grid gap-4">
         
         {/* Nombre y Monto */}
