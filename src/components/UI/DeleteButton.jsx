@@ -2,16 +2,16 @@ import React from 'react';
 import { db } from '../../connection/firebase';
 import { deleteDoc, doc } from 'firebase/firestore';
 
-const DeleteButton = ({ row }) => {
+const DeleteButton = ({ row, collectionName, onDeleteSuccess }) => {
   const handleDelete = async () => {
-    if (window.confirm(`¿Estás seguro de que deseas eliminar a ${row.username}?`)) {
+    if (window.confirm(`¿Estás seguro de que deseas eliminar el registro "${row.name || row.id}"?`)) {
       try {
-        await deleteDoc(doc(db, 'users', row.id)); // Eliminar el documento de la base de datos
-        alert("Usuario eliminado correctamente.");
-        // Puedes añadir un callback aquí si necesitas actualizar la interfaz de usuario en `UserManagement`
+        await deleteDoc(doc(db, collectionName, row.id)); // Eliminar el documento de la colección pasada como prop
+        alert("Registro eliminado correctamente.");
+        if (onDeleteSuccess) onDeleteSuccess(row.id); // Llamar al callback si está definido
       } catch (error) {
-        console.error("Error al eliminar usuario:", error);
-        alert("Hubo un error al eliminar el usuario.");
+        console.error("Error al eliminar el registro:", error);
+        alert("Hubo un error al eliminar el registro.");
       }
     }
   };

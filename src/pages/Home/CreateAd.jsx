@@ -12,15 +12,49 @@ const cities = [
   { value: 'Santa Cruz', label: 'Santa Cruz' },
   { value: 'La Paz', label: 'La Paz' },
   { value: 'Cochabamba', label: 'Cochabamba' },
-  // Añadir otras 27 ciudades importantes
+  { value: 'El Alto', label: 'El Alto' },
+  { value: 'Oruro', label: 'Oruro' },
+  { value: 'Sucre', label: 'Sucre' },
+  { value: 'Tarija', label: 'Tarija' },
+  { value: 'Potosí', label: 'Potosí' },
+  { value: 'Trinidad', label: 'Trinidad' },
+  { value: 'Montero', label: 'Montero' },
+  { value: 'Quillacollo', label: 'Quillacollo' },
+  { value: 'Riberalta', label: 'Riberalta' },
+  { value: 'Guayaramerín', label: 'Guayaramerín' },
+  { value: 'Cobija', label: 'Cobija' },
+  { value: 'Yacuiba', label: 'Yacuiba' },
+  { value: 'Sacaba', label: 'Sacaba' },
+  { value: 'Camiri', label: 'Camiri' },
+  { value: 'Tupiza', label: 'Tupiza' },
+  { value: 'Villazón', label: 'Villazón' },
+  { value: 'San Ignacio de Velasco', label: 'San Ignacio de Velasco' },
+  { value: 'Warnes', label: 'Warnes' },
+  { value: 'Villa Montes', label: 'Villa Montes' },
+  { value: 'Llallagua', label: 'Llallagua' },
+  { value: 'Caranavi', label: 'Caranavi' },
+  { value: 'San Borja', label: 'San Borja' },
+  { value: 'Huanuni', label: 'Huanuni' },
+  { value: 'Punata', label: 'Punata' },
+  { value: 'Rurrenabaque', label: 'Rurrenabaque' },
+  { value: 'Uyuni', label: 'Uyuni' },
   { value: 'Otra', label: 'Otra' }
 ];
+
 
 const transactionTypes = [
   { value: 'venta', label: 'Venta' },
   { value: 'preventa', label: 'Preventa' },
   { value: 'alquiler', label: 'Alquiler' },
   { value: 'anticretico', label: 'Anticrético' }
+];
+
+const placeTypes = [
+  { value: 'departamento', label: 'Departamento' },
+  { value: 'edificio', label: 'Edificio' },
+  { value: 'casa', label: 'Casa' },
+  { value: 'local', label: 'Local' },
+  { value: 'oficina', label: 'Oficina' }
 ];
 
 const CreateAd = () => {
@@ -37,9 +71,11 @@ const CreateAd = () => {
     id: `ID-Publication-${uuidv4().slice(0, 8)}`,
     name: '',
     amount: '',
-    contact: '',
+    contact: currentUser?.phone || '',
     description: '',
     transactionType: '',
+    placeType: '',
+    address: '',
     imageUrls: [],
     city: '',
     customCity: '',
@@ -48,9 +84,9 @@ const CreateAd = () => {
     area: '',
     latitude: '',
     longitude: '',
-    state: 'active',
+    state: (currentUser?.role === 'Administrador' || currentUser?.role === 'Inmobiliario Plus') ? 'priority' : 'active',
     uploadedAt: new Date().toISOString().split('T')[0],
-    uploadedBy: currentUser?.uid || '',
+    uploadedBy: currentUser?.uid || currentUser?.id || "",
     deletedBy: '',
   });
 
@@ -67,6 +103,10 @@ const CreateAd = () => {
 
   const handleTransactionTypeChange = (selectedOption) => {
     setFormData({ ...formData, transactionType: selectedOption.value });
+  };
+
+  const handlePlaceTypeChange = (selectedOption) => {
+    setFormData({ ...formData, placeType: selectedOption.value });
   };
 
   const handleImageChange = (e) => {
@@ -107,7 +147,7 @@ const CreateAd = () => {
   };
 
   // Función para renderizar un input con etiqueta y opcionalmente un icono
-  const renderLabeledInput = (label, name, type, icon) => (
+  const renderLabeledInput = (label, name, type, icon, placeholder = '') => (
     <div>
       <label className="block text-gray-700 text-sm mb-1 flex items-center">
         {icon && <span className="mr-1">{icon}</span>}
@@ -119,6 +159,7 @@ const CreateAd = () => {
         value={formData[name]}
         onChange={handleInputChange}
         required
+        placeholder={placeholder}
         className="w-full p-1 border rounded"
       />
     </div>
@@ -130,12 +171,22 @@ const CreateAd = () => {
         
         {/* Nombre y Monto */}
         <div className="grid grid-cols-2 gap-4">
-          {renderLabeledInput('Nombre', 'name', 'text')}
-          {renderLabeledInput('Monto', 'amount', 'text')}
+          {renderLabeledInput('Nombre', 'name', 'text', null, 'Ejemplo: Departamento de lujo')}
+          {renderLabeledInput('Monto', 'amount', 'text', null, 'Ejemplo: 120000')}
         </div>
 
         {/* Contacto */}
-        {renderLabeledInput('Contacto', 'contact', 'text', <FaWhatsapp className="text-green-600" />)}
+        {renderLabeledInput('Contacto', 'contact', 'text', <FaWhatsapp className="text-green-600" />, 'Ejemplo: +59112345678')}
+
+        {/* Tipo de Lugar */}
+        <div>
+          <label className="block text-gray-700 text-sm mb-1">Tipo de Lugar</label>
+          <Select
+            options={placeTypes}
+            onChange={handlePlaceTypeChange}
+            className="mb-2"
+          />
+        </div>
 
         {/* Tipo de Transacción */}
         <div>
@@ -167,17 +218,20 @@ const CreateAd = () => {
           )}
         </div>
 
+        {/* Dirección */}
+        {renderLabeledInput('Dirección', 'address', 'text', null, 'Ejemplo: Av. Principal 123')}
+
         {/* Habitaciones, Baños y Área */}
         <div className="grid grid-cols-3 gap-4">
-          {renderLabeledInput('Habitaciones', 'rooms', 'number', <FaBed />)}
-          {renderLabeledInput('Baños', 'bathrooms', 'number', <FaBath />)}
-          {renderLabeledInput('Área (m²)', 'area', 'number', <FaRuler />)}
+          {renderLabeledInput('Habitaciones', 'rooms', 'number', <FaBed />, 'Ejemplo: 3')}
+          {renderLabeledInput('Baños', 'bathrooms', 'number', <FaBath />, 'Ejemplo: 2')}
+          {renderLabeledInput('Área (m²)', 'area', 'number', <FaRuler />, 'Ejemplo: 120')}
         </div>
 
         {/* Coordenadas */}
         <div className="grid grid-cols-2 gap-4">
-          {renderLabeledInput('Latitud', 'latitude', 'number')}
-          {renderLabeledInput('Longitud', 'longitude', 'number')}
+          {renderLabeledInput('Latitud', 'latitude', 'number', null, 'Ejemplo: -17.78629')}
+          {renderLabeledInput('Longitud', 'longitude', 'number', null, 'Ejemplo: -63.18117')}
         </div>
 
         {/* Descripción */}
@@ -188,6 +242,7 @@ const CreateAd = () => {
             value={formData.description}
             onChange={handleInputChange}
             required
+            placeholder="Ejemplo: Propiedad con acabados de lujo, cerca de colegios y supermercados..."
             className="w-full p-1 border rounded"
           />
         </div>

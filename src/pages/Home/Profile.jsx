@@ -28,7 +28,7 @@ const Profile = () => {
     }
 
     const fetchUserProfile = async () => {
-      const userDoc = doc(db, 'users', currentUser.uid);
+      const userDoc = doc(db, 'users', currentUser.id || currentUser.uid);
       const docSnapshot = await getDoc(userDoc);
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();

@@ -51,6 +51,16 @@ const EditButton = ({ row, fieldsConfig, onUpdateSuccess, collectionName }) => {
               className={`w-full p-2 border rounded ${!field.editable ? 'bg-gray-200' : ''}`}
             />
           )}
+          {field.type === 'textarea' && (
+            <textarea
+              name={field.name}
+              value={formData[field.name] || ''}
+              readOnly={!field.editable}
+              onChange={(e) => field.editable && handleChange(e)}
+              className={`w-full p-2 border rounded ${!field.editable ? 'bg-gray-200' : ''}`}
+              rows={4}
+            />
+          )}
           {field.type === 'select' && (
             <select
               name={field.name}

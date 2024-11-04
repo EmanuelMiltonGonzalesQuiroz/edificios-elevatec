@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
-import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBath, FaMap } from 'react-icons/fa';
+import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBath, FaMap, FaMapSigns, FaBuilding } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import EditButton from '../../components/UI/EditButton';
 import DeleteButton from '../../components/UI/DeleteButton';
 import { useAuth } from '../../context/AuthContext';
 
-const PostDetailsModal = ({ publication, onClose }) => {
+const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeletePublication }) => {
   const { currentUser } = useAuth();
   const [selectedImage, setSelectedImage] = useState(null);
 
   const whatsappUrl = `https://wa.me/${publication.contact}?text=Hola, estoy interesado/a en el inmueble "${publication.name}". Descripción: ${publication.description}`;
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${publication.latitude},${publication.longitude}`;
-
-  // Configuración de campos editables para la publicación
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(publication.latitude)},${encodeURIComponent(publication.longitude)}`;
+ // Configuración de campos editables para la publicación
   const editFieldsConfig = [
     { label: 'Nombre', name: 'name', type: 'input', editable: true, validation: /^[a-zA-Z\s]+$/ },
     { label: 'Descripción', name: 'description', type: 'textarea', editable: true },
@@ -23,8 +22,10 @@ const PostDetailsModal = ({ publication, onClose }) => {
     { label: 'Habitaciones', name: 'rooms', type: 'input', editable: true, validation: /^[0-9]+$/ },
     { label: 'Baños', name: 'bathrooms', type: 'input', editable: true, validation: /^[0-9]+$/ },
     { label: 'Tipo de Transacción', name: 'transactionType', type: 'select', options: ['preventa', 'venta', 'alquiler'], editable: true },
+    { label: 'Dirección', name: 'address', type: 'input', editable: true },
+    { label: 'Tipo de Lugar', name: 'placeType', type: 'select', options: ['departamento', 'edificio', 'casa', 'local', 'oficina'], editable: true },
   ];
-
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-5xl w-full flex relative">
@@ -41,6 +42,14 @@ const PostDetailsModal = ({ publication, onClose }) => {
             <div className="flex items-center space-x-2 text-gray-600">
               <FaMapMarkerAlt />
               <p>{publication.city}</p>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <FaBuilding />
+              <p>Tipo de Lugar: {publication.placeType}</p>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <FaMapSigns />
+              <p>Dirección: {publication.address}</p>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <FaHome />
@@ -94,15 +103,20 @@ const PostDetailsModal = ({ publication, onClose }) => {
             {currentUser?.role === 'Administrador' && (
               <div className="flex space-x-4 mt-4">
                 <EditButton 
-                  publication={publication} 
+                  row={publication} 
                   fieldsConfig={editFieldsConfig} 
                   collectionName="publications"
                   onUpdateSuccess={(updatedPublication) => {
-                    // Actualizar estado con la publicación editada (si es necesario)
-                    console.log('Publicación actualizada:', updatedPublication);
+                    onUpdatePublication && onUpdatePublication(updatedPublication); // Verifica que la función esté definida antes de llamar
                   }}
                 />
-                <DeleteButton publication={publication} />
+                <DeleteButton 
+                  row={publication}
+                  collectionName="publications" // Pasa el nombre de la colección
+                  onDeleteSuccess={(deletedId) => {
+                    onDeletePublication && onDeletePublication(deletedId); // Callback para eliminar la publicación de la UI
+                  }}
+                />
               </div>
             )}
           </div>

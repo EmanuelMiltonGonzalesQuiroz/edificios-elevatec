@@ -11,8 +11,9 @@ const UserManagement = () => {
     { label: 'Nombre', name: 'username', type: 'input', editable: true, validation: /^[a-zA-Z\s]+$/ },
     { label: 'Email', name: 'email', type: 'input', editable: false }, // Solo lectura
     { label: 'Teléfono', name: 'phone', type: 'input', editable: true, validation: /^[0-9]+$/ },
-    { label: 'Rol', name: 'role', type: 'select', options: ['Usuario', 'Administrador'], editable: true },
+    { label: 'Rol', name: 'role', type: 'select', options: ['Usuario', 'Administrador', 'Inmobiliario', 'Inmobiliario Plus', 'Edificio'], editable: true },
   ]);
+  
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -34,7 +35,6 @@ const UserManagement = () => {
 
   return (
     <div className="p-4 min-w-[60vw] text-black">
-      <h2 className="text-xl font-semibold mb-4">Gestión de Usuarios</h2>
       <Table 
         columnTitles={['Nombre', 'Email', 'Teléfono']}
         data={users} 
@@ -48,7 +48,7 @@ const UserManagement = () => {
               fieldsConfig={editFieldsConfig}
             />
           ), 
-          (props) => <DeleteButton {...props} />
+          (props) => <DeleteButton {...props} collectionName="users" />
         ]}
       />
     </div>

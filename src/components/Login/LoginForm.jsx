@@ -1,8 +1,6 @@
 // src/components/Login/LoginForm.jsx
 
 import React, { useState } from 'react';
-import { fetchSignInMethodsForEmail } from 'firebase/auth';
-import { auth } from '../../connection/firebase';
 import { useAuth } from '../../context/AuthContext';
 import LoginFields from './LoginFields';
 import logo from '../../assets/images/COTA LOGO/elevatec_logo_sin_fondo.png';
@@ -12,7 +10,7 @@ import {
   loginWithGoogle,
   registerWithGoogle,
   checkUserExistsByUID,
-} from '../../services/AuthService';
+} from '../../services/auth';
 import GoogleButton from './GoogleButton';
 import ToggleAuthMode from './ToggleAuthMode';
 
@@ -23,20 +21,9 @@ const LoginForm = () => {
   const [error, setError] = useState('');
   const { login } = useAuth();
 
-  // Función para validar el formato del correo electrónico
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // Función para validar la fortaleza de la contraseña
-  const isValidPassword = (password) => {
-    return password.length >= 6;
-  };
-
   const handleLogin = async () => {
     setError('');
-    if (email === '' || password === '') {
+    if (!email || !password) {
       setError('Por favor, completa todos los campos.');
       return;
     }
@@ -50,7 +37,7 @@ const LoginForm = () => {
           setError('Contraseña incorrecta.');
         }
       } else {
-        setError('El usuario no está registrado.');
+        setError('El usuario no está registrado. Por favor regístrate.');
       }
     } catch (error) {
       setError('Error al iniciar sesión.');
@@ -59,33 +46,16 @@ const LoginForm = () => {
 
   const handleRegister = async () => {
     setError('');
-    if (email === '' || password === '') {
+    if (!email || !password) {
       setError('Por favor, completa todos los campos.');
-      return;
-    }
-    if (!isValidEmail(email)) {
-      setError('Ingresa un correo electrónico válido.');
-      return;
-    }
-    if (!isValidPassword(password)) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
     try {
       const userData = await checkUserExists(email);
       if (userData) {
         setError('Este correo ya está registrado. Inicia sesión en su lugar.');
-        setIsRegistering(false);
         return;
       }
-
-      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-      if (signInMethods.length > 0) {
-        setError('Este correo ya está registrado en Firebase Auth. Inicia sesión en su lugar.');
-        setIsRegistering(false);
-        return;
-      }
-
       const newUserData = await registerUser(email, password);
       login(newUserData);
       window.location.href = '/';
@@ -103,7 +73,7 @@ const LoginForm = () => {
         login(userData);
         window.location.href = '/';
       } else {
-        setError('El usuario no está registrado.');
+        setError('El usuario no está registrado. Por favor regístrate.');
       }
     } catch (error) {
       setError('Error al iniciar sesión con Google.');
@@ -117,7 +87,6 @@ const LoginForm = () => {
       const userExists = await checkUserExistsByUID(user.uid);
       if (userExists) {
         setError('Este correo ya está registrado. Inicia sesión en su lugar.');
-        setIsRegistering(false);
         return;
       }
       const newUserData = await registerWithGoogle(user);
@@ -141,7 +110,6 @@ const LoginForm = () => {
         setEmail={setEmail}
         password={password}
         setPassword={setPassword}
-        error={error}
         handleSubmit={isRegistering ? handleRegister : handleLogin}
         isRegistering={isRegistering}
       />

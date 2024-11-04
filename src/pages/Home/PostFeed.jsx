@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../connection/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Carousel } from 'react-responsive-carousel';
-import { FaMapMarkerAlt, FaHome, FaDollarSign } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaHome, FaDollarSign, FaMapSigns, FaBuilding } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import PostDetailsModal from './PostDetailsModal';
 
@@ -14,7 +14,7 @@ const PostFeed = ({ filters }) => {
   useEffect(() => {
     const fetchPublications = async () => {
       try {
-        let q = query(collection(db, 'publications'), where('state', '==', 'active'));
+        let q = query(collection(db, 'publications'), where('state', '!=', 'inactive' ));
 
         if (filters.transactionType) q = query(q, where('transactionType', '==', filters.transactionType));
         if (filters.rooms) q = query(q, where('rooms', '==', filters.rooms));
@@ -32,7 +32,13 @@ const PostFeed = ({ filters }) => {
               (!filters.areaMax || doc.area <= filters.areaMax);
             return meetsPrice && meetsArea;
           })
-          .sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+          .sort((a, b) => {
+            // Prioridad de estado: 'priority' primero
+            if (a.state === 'priority' && b.state !== 'priority') return -1;
+            if (a.state !== 'priority' && b.state === 'priority') return 1;
+            // Orden por fecha de carga (más reciente primero)
+            return new Date(b.uploadedAt) - new Date(a.uploadedAt);
+          });
 
         setPublications(publicationsData);
       } catch (error) {
@@ -64,19 +70,32 @@ const PostFeed = ({ filters }) => {
               className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl cursor-pointer"
             >
               <h3 className="text-xl font-bold mb-2 text-gray-800">{pub.name}</h3>
+  
               <div className="flex items-center space-x-2 text-gray-600 mb-1">
                 <FaDollarSign />
                 <p className="text-gray-700">${pub.amount}</p>
               </div>
+  
               <div className="flex items-center space-x-2 text-gray-600 mb-1">
                 <FaMapMarkerAlt />
                 <p>{pub.city}</p>
               </div>
+  
+              <div className="flex items-center space-x-2 text-gray-600 mb-1">
+                <FaBuilding />
+                <p>Tipo de Lugar: {pub.placeType}</p>
+              </div>
+  
+              <div className="flex items-center space-x-2 text-gray-600 mb-1">
+                <FaMapSigns />
+                <p>Dirección: {pub.address}</p>
+              </div>
+  
               <div className="flex items-center space-x-2 text-gray-600 mb-1">
                 <FaHome />
                 <p>Tipo: {pub.transactionType}</p>
               </div>
-
+  
               {pub.imageUrls && pub.imageUrls.length > 0 && (
                 <Carousel
                   showThumbs={false}
@@ -97,10 +116,17 @@ const PostFeed = ({ filters }) => {
           ))}
         </div>
       )}
-
+  
       {/* Modal de detalles de la publicación */}
       {selectedPublication && (
-        <PostDetailsModal publication={selectedPublication} onClose={() => setSelectedPublication(null)} />
+        <PostDetailsModal 
+          publication={selectedPublication} 
+          onClose={() => setSelectedPublication(null)} 
+          onDeletePublication={(deletedId) => {
+            setPublications((prevPublications) => prevPublications.filter(pub => pub.id !== deletedId));
+            setSelectedPublication(null); // Cierra el modal automáticamente después de eliminar
+          }}
+        />
       )}
     </div>
   );

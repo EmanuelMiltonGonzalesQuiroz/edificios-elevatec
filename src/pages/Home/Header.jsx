@@ -33,13 +33,13 @@ const Header = ({ onApplyFilters, onClearFilters }) => {
             buttonText={<span className="md:inline">Filtros</span>}
             modalContent={() => <Filters onApplyFilters={onApplyFilters} />}
             title="Filtros de Búsqueda"
-            className="flex items-center space-x-2 bg-blue-500 py-2 px-4 rounded-md hover:bg-gray-100 transition w-[150px] max-w-xs"
+            className="flex items-center space-x-2 bg-blue-500 py-2 px-4 rounded-md hover:bg-gray-100 transition max-w-[150px] max-w-xs"
           />
           
           {/* Botón de Quitar Filtros */}
           <button
             onClick={onClearFilters}
-            className="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition w-[150px] max-w-xs"
+            className="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition max-w-[150px] max-w-xs"
           >
             <FaTimesCircle />
             <span className="md:inline">Quitar Filtros</span>
