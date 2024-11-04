@@ -27,12 +27,12 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
   ];
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-5xl w-full flex relative">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 ">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-5xl w-full flex flex-col sm:flex-row relative max-h-[90vh] overflow-auto">
         <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 text-2xl">&times;</button>
 
         {/* Detalles de la publicación */}
-        <div className="w-1/4 p-4 space-y-4 text-left">
+        <div className="w-full sm:w-1/2 md:w-1/2 p-4 space-y-4 text-left">
           <h3 className="text-2xl font-bold mb-4 text-gray-800">{publication.name}</h3>
           <div className="space-y-2">
             <div className="flex items-center space-x-2 text-gray-600">
@@ -123,10 +123,10 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
         </div>
 
         {/* Carrusel de Imágenes */}
-        <div className="w-3/4 p-4">
+        <div className="w-full sm:w-1/2 md:w-1/2 p-4">
           <Carousel showThumbs={false} showIndicators={false} showStatus={false} infiniteLoop={true} className="rounded-lg overflow-hidden">
             {publication.imageUrls?.map((url, index) => (
-              <div key={index} onClick={() => setSelectedImage(url)} className="w-full h-[400px]">
+              <div key={index} onClick={() => setSelectedImage(url)} className="w-full h-[500px]">
                 <img src={url} alt={`Imagen de la publicación`} className="object-cover w-full h-full" />
               </div>
             ))}

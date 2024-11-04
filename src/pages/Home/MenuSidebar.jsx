@@ -1,9 +1,10 @@
 import React from 'react';
-import { FaUserCircle, FaPlus, FaSignOutAlt, FaUsers } from 'react-icons/fa';
+import { FaUserCircle, FaPlus, FaSignOutAlt, FaUsers, FaEye } from 'react-icons/fa';
 import OpenModalButton from '../../components/UI/OpenModalButton';
 import Profile from './Profile';
 import CreateAd from './CreateAd';
 import UserManagement from './UserManagement'; // Importa el modal para gestionar usuarios
+import ViewedPosts from './ViewedPosts'; // Importa el componente para publicaciones vistas
 import { useAuth } from '../../context/AuthContext';
 import { homeText } from '../../components/common/Text/texts';
 
@@ -48,11 +49,20 @@ const MenuSidebar = ({ isOpen, onClose }) => {
           <OpenModalButton
             icon={FaUsers}
             buttonText="Usuarios"
-            modalContent={UserManagement} // Modal que mostrará la tabla de usuarios
+            modalContent={UserManagement}
             title="Gestión de Usuarios"
             className="flex items-center space-x-3 text-white bg-gradient-to-r from-green-500 to-green-700 hover:bg-green-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
           />
         )}
+
+        {/* Botón Vistos */}
+        <OpenModalButton
+          icon={FaEye}
+          buttonText="Vistos"
+          modalContent={ViewedPosts}
+          title="Publicaciones Vistas"
+          className="flex items-center space-x-3 text-white bg-gradient-to-r from-purple-500 to-purple-700 hover:bg-purple-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
+        />
 
         {/* Botón de Cerrar Sesión */}
         {currentUser && (

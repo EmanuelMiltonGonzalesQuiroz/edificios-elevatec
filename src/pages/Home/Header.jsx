@@ -33,7 +33,7 @@ const Header = ({ onApplyFilters, onClearFilters }) => {
             buttonText={<span className="md:inline">Filtros</span>}
             modalContent={() => <Filters onApplyFilters={onApplyFilters} />}
             title="Filtros de Búsqueda"
-            className="flex items-center space-x-2 bg-blue-500 py-2 px-4 rounded-md hover:bg-gray-100 transition max-w-[150px] max-w-xs"
+            className="flex items-center space-x-2 bg-blue-500 py-2 px-4 rounded-md hover:bg-gray-100 transition max-w-[140px] max-w-xs"
           />
           
           {/* Botón de Quitar Filtros */}
