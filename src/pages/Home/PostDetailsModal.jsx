@@ -4,6 +4,8 @@ import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBat
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import EditButton from '../../components/UI/EditButton';
 import DeleteButton from '../../components/UI/DeleteButton';
+import DisableButton from '../../components/UI/DisableButton';
+import EnableButton from '../../components/UI/EnableButton';
 import { useAuth } from '../../context/AuthContext';
 
 const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeletePublication }) => {
@@ -12,7 +14,7 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
 
   const whatsappUrl = `https://wa.me/${publication.contact}?text=Hola, estoy interesado/a en el inmueble "${publication.name}". Descripción: ${publication.description}`;
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(publication.latitude)},${encodeURIComponent(publication.longitude)}`;
- // Configuración de campos editables para la publicación
+
   const editFieldsConfig = [
     { label: 'Nombre', name: 'name', type: 'input', editable: true, validation: /^[a-zA-Z\s]+$/ },
     { label: 'Descripción', name: 'description', type: 'textarea', editable: true },
@@ -99,23 +101,36 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
               <FaMap className="mr-2" /> Ver en Maps
             </a>
 
-            {/* Mostrar botones de edición y eliminación solo para administradores */}
+            {/* Mostrar botones de edición, eliminación y habilitar/inactivar solo para administradores */}
             {currentUser?.role === 'Administrador' && (
               <div className="flex space-x-4 mt-4">
                 <EditButton 
                   row={publication} 
                   fieldsConfig={editFieldsConfig} 
                   collectionName="publications"
-                  onUpdateSuccess={(updatedPublication) => {
-                    onUpdatePublication && onUpdatePublication(updatedPublication); // Verifica que la función esté definida antes de llamar
-                  }}
+                  onUpdateSuccess={onUpdatePublication}
                 />
+                {publication.state !== 'inactive' ? (
+                  <DisableButton
+                    row={publication}
+                    collectionName="publications"
+                    onDisableSuccess={(id) => {
+                      if (onUpdatePublication) onUpdatePublication({ ...publication, state: 'inactive' });
+                    }}
+                  />
+                ) : (
+                  <EnableButton
+                    row={publication}
+                    collectionName="publications"
+                    onEnableSuccess={(id) => {
+                      if (onUpdatePublication) onUpdatePublication({ ...publication, state: 'active' });
+                    }}
+                  />
+                )}
                 <DeleteButton 
                   row={publication}
-                  collectionName="publications" // Pasa el nombre de la colección
-                  onDeleteSuccess={(deletedId) => {
-                    onDeletePublication && onDeletePublication(deletedId); // Callback para eliminar la publicación de la UI
-                  }}
+                  collectionName="publications"
+                  onDeleteSuccess={onDeletePublication}
                 />
               </div>
             )}

@@ -97,7 +97,7 @@ const EditButton = ({ row, fieldsConfig, onUpdateSuccess, collectionName }) => {
       buttonText="Editar" 
       modalContent={ModalContent} 
       title="Editar Registro" 
-      className="bg-yellow-500 text-white text-center flex justify-center items-center w-[100px] h-[30px] rounded hover:bg-yellow-600 transition" 
+      className="bg-green-500 text-white text-center flex justify-center items-center w-full h-[30px] rounded hover:bg-yellow-600 transition" 
     />
   );
 };

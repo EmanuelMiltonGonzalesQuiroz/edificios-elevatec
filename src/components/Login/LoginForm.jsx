@@ -30,6 +30,10 @@ const LoginForm = () => {
     try {
       const userData = await checkUserExists(email);
       if (userData) {
+        if (userData.state === 'inactive') {
+          setError('Su cuenta ha sido deshabilitada.');
+          return;
+        }
         if (userData.password === password) {
           login(userData);
           window.location.href = '/';
@@ -70,13 +74,17 @@ const LoginForm = () => {
       const user = await loginWithGoogle();
       const userData = await checkUserExistsByUID(user.uid);
       if (userData) {
+        if (userData.state === 'inactive') {
+          setError('Su cuenta ha sido deshabilitada.');
+          return;
+        }
         login(userData);
         window.location.href = '/';
       } else {
         setError('El usuario no está registrado. Por favor regístrate.');
       }
     } catch (error) {
-      setError('Error al iniciar sesión con Google.');
+      setError(error.message || 'Error al iniciar sesión con Google.');
     }
   };
 

@@ -19,8 +19,17 @@ const PostFeed = ({ filters }) => {
     const fetchPublications = async () => {
       setLoading(true);
       try {
-        let q = query(collection(db, 'publications'), where('state', '!=', 'inactive'));
+        let q;
 
+        if (currentUser?.role !== 'Administrador') {
+          // Si el rol no es Administrador, excluye publicaciones con estado 'inactive'
+          q = query(collection(db, 'publications'), where('state', '!=', 'inactive'));
+        } else {
+          // Para el rol de Administrador, no aplica el filtro de estado
+          q = query(collection(db, 'publications'));
+        }
+
+        // Aplicar filtros adicionales
         if (filters.transactionType) q = query(q, where('transactionType', '==', filters.transactionType));
         if (filters.rooms) q = query(q, where('rooms', '==', filters.rooms));
         if (filters.bathrooms) q = query(q, where('bathrooms', '==', filters.bathrooms));
@@ -52,7 +61,7 @@ const PostFeed = ({ filters }) => {
     };
 
     fetchPublications();
-  }, [filters]);
+  }, [filters, currentUser]);
 
   const handlePublicationClick = async (publication) => {
     if (!currentUser) {
@@ -121,7 +130,6 @@ const PostFeed = ({ filters }) => {
                 <p>Tipo: {pub.transactionType}</p>
               </div>
 
-              {/* Carga diferida de imágenes y muestra solo la primera inicialmente */}
               {pub.imageUrls && pub.imageUrls.length > 0 && (
                 <Carousel
                   showThumbs={false}

@@ -36,13 +36,16 @@ const MenuSidebar = ({ isOpen, onClose }) => {
         />
 
         {/* Botón Publicar Anuncio */}
-        <OpenModalButton
-          icon={FaPlus}
-          buttonText="Publicar Anuncio"
-          modalContent={CreateAd}
-          title="Crear Nuevo Anuncio"
-          className="flex items-center space-x-3 text-white bg-gradient-to-r from-blue-500 to-blue-700 hover:bg-blue-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
-        />
+        {currentUser.role !== "Usuario" && (
+            <OpenModalButton
+            icon={FaPlus}
+            buttonText="Publicar Anuncio"
+            modalContent={CreateAd}
+            title="Crear Nuevo Anuncio"
+            className="flex items-center space-x-3 text-white bg-gradient-to-r from-blue-500 to-blue-700 hover:bg-blue-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
+          />
+        )}
+        
 
         {/* Botón Usuarios (solo para Administrador) */}
         {currentUser?.role === 'Administrador' && (

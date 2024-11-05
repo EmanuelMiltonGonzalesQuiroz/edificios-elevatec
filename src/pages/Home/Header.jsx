@@ -26,25 +26,28 @@ const Header = ({ onApplyFilters, onClearFilters }) => {
 
       {/* Barra de filtros */}
       <div className="bg-gray-600 py-2 shadow-inner">
-        <div className="container mx-auto flex justify-center gap-4">
-          {/* Botón de Filtros */}
-          <OpenModalButton
-            icon={FaFilter}
-            buttonText={<span className="md:inline">Filtros</span>}
-            modalContent={() => <Filters onApplyFilters={onApplyFilters} />}
-            title="Filtros de Búsqueda"
-            className="flex items-center space-x-2 bg-blue-500 py-2 px-4 rounded-md hover:bg-gray-100 transition max-w-[140px] max-w-xs"
-          />
-          
-          {/* Botón de Quitar Filtros */}
-          <button
-            onClick={onClearFilters}
-            className="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition max-w-[150px] max-w-xs"
-          >
-            <FaTimesCircle />
-            <span className="md:inline">Quitar Filtros</span>
-          </button>
-        </div>
+      <div className="container mx-auto flex justify-center gap-4">
+        {/* Botón de Filtros */}
+        <OpenModalButton
+          icon={FaFilter}
+          buttonText={<span className="md:inline">Buscar</span>}
+          modalContent={() => <Filters onApplyFilters={onApplyFilters} />}
+          title="Filtros de Búsqueda"
+          className="flex items-center space-x-2 bg-blue-500 py-2 px-4 rounded-md hover:bg-gray-100 transition max-w-[150px]"
+        />
+        
+        {/* Botón de Quitar Filtros */}
+        <button
+  onClick={onClearFilters}
+  className="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition max-w-[150px]"
+>
+  <div className="flex items-center justify-center w-6 h-6 bg-red-500 rounded-full">
+    <FaTimesCircle className="text-red text-xl" /> {/* Ajuste de color de la X */}
+  </div>
+  <span className="md:inline">Eliminar</span>
+</button>
+
+      </div>
       </div>
 
       {/* Sidebar de menú */}

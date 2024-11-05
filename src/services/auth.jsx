@@ -16,41 +16,55 @@ export async function checkUserExists(email) {
   }
 }
 
+// Función para registrar un usuario con email y contraseña
 export async function registerUser(email, password) {
   try {
-    // Crear un UID ficticio a partir del email (en producción se usaría un UID generado por el sistema de autenticación)
-
-    // Referencia al documento del usuario
     const userDocRef = doc(db, 'users', email);
 
-    // Datos del nuevo usuario
     const newUser = {
       uid: email,
       email: email,
       username: email.split('@')[0] || email,
       role: 'Usuario',
-      password: password, // Nota: No almacenar contraseñas en texto plano en producción
+      password: password, // No almacenar contraseñas en texto plano en producción
       fechaCreacion: new Date().toISOString(),
-      phone: "N/A"
+      phone: "N/A",
+      state: 'active' // El usuario se registra como activo
     };
 
-    // Guardar el nuevo usuario en Firestore
     await setDoc(userDocRef, newUser);
     console.log('Usuario registrado exitosamente:', newUser);
     return newUser;
-
   } catch (error) {
     console.error('Error al registrar al usuario:', error.message);
     alert(`Error al registrar al usuario: ${error.message}`);
     throw error;
   }
 }
+
 // Función para iniciar sesión con Google
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   try {
     const result = await signInWithPopup(auth, provider);
-    return result.user;
+    const user = result.user;
+
+    const userDocRef = doc(db, 'users', user.uid);
+    const docSnapshot = await getDoc(userDocRef);
+
+    if (docSnapshot.exists()) {
+      const userData = docSnapshot.data();
+      
+      // Verifica si el estado del usuario es "inactive"
+      if (userData.state === 'inactive') {
+        throw new Error('Su cuenta ha sido deshabilitada.');
+      }
+      return userData; // Retorna datos si el usuario está activo
+    } else {
+      // Si el usuario no existe en la base de datos, lo registramos
+      const newUser = await registerWithGoogle(user);
+      return newUser;
+    }
   } catch (error) {
     console.error('Error al iniciar sesión con Google:', error.message);
     throw error;
@@ -60,7 +74,6 @@ export async function loginWithGoogle() {
 // Función para registrar con Google
 export async function registerWithGoogle(user) {
   try {
-    // Verifica si el usuario ya existe
     const userDocRef = doc(db, 'users', user.uid);
     const docSnapshot = await getDoc(userDocRef);
 
@@ -71,11 +84,12 @@ export async function registerWithGoogle(user) {
         username: user.displayName || 'Usuario',
         role: 'Usuario',
         fechaCreacion: new Date().toISOString(),
+        state: 'active' // Registro inicial del usuario como activo
       };
-      await setDoc(userDocRef, newUser); // Crea el documento con el UID como ID
+      await setDoc(userDocRef, newUser);
     }
 
-    return user; // Retorna el objeto de usuario de Google
+    return user;
   } catch (error) {
     console.error('Error al registrar al usuario con Google:', error.message);
     throw error;
@@ -94,7 +108,7 @@ export async function checkUserExistsByUID(uid) {
   }
 }
 
-// Función para validar credenciales de usuario (sin almacenamiento de contraseñas en texto plano)
+// Función para validar credenciales de usuario con email y contraseña
 export async function validateUserCredentials(email, password) {
   try {
     const usersRef = collection(db, 'users');
@@ -102,24 +116,25 @@ export async function validateUserCredentials(email, password) {
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      console.log('No se encontró el email en Firestore.');
-      return { success: false };
+      return { success: false, message: 'Usuario no encontrado' };
     } else {
       let userDoc;
       let userId;
       querySnapshot.forEach((doc) => {
         userDoc = doc.data();
         userId = doc.id;
-        console.log('Datos obtenidos de Firestore:', userDoc);
       });
+
+      // Verificar si el usuario está inactivo
+      if (userDoc.state === 'inactive') {
+        return { success: false, message: 'Su cuenta ha sido deshabilitada.' };
+      }
 
       // Compara contraseñas aquí (se recomienda usar una comparación segura en el backend)
       if (userDoc.password === password) {
-        console.log('Credenciales correctas');
         return { success: true, userData: { ...userDoc, id: userId } };
       } else {
-        console.log('Password incorrecto.');
-        return { success: false };
+        return { success: false, message: 'Contraseña incorrecta' };
       }
     }
   } catch (error) {
