@@ -21,7 +21,7 @@ const PostFeed = ({ filters }) => {
       try {
         let q;
 
-        if (currentUser?.role !== 'Administrador') {
+        if (currentUser &&currentUser?.role !== 'Administrador') {
           // Si el rol no es Administrador, excluye publicaciones con estado 'inactive'
           q = query(collection(db, 'publications'), where('state', '!=', 'inactive'));
         } else {
