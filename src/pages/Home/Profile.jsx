@@ -72,7 +72,7 @@ const Profile = () => {
     <div className="p-4 min-w-[30vw] max-w-[90vw]">
       <div className="space-y-4">
         <div>
-          <label className="block font-semibold text-gray-700">Nombre de Usuario:</label>
+          <label className="block font-semibold text-gray-700">Usuario:</label>
           {isEditing ? (
             <input
               type="text"
@@ -91,7 +91,13 @@ const Profile = () => {
         </div>
         <div>
           <label className="block font-semibold text-gray-700">Fecha de Creación:</label>
-          <p className="text-gray-700">{profileData.fechaCreacion}</p>
+          <p className="text-gray-700">
+            {new Date(profileData.fechaCreacion).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </p>
         </div>
         <div>
           <label className="block font-semibold text-gray-700">Teléfono:</label>
@@ -106,10 +112,6 @@ const Profile = () => {
           ) : (
             <p className="text-gray-700">{profileData.phone}</p>
           )}
-        </div>
-        <div>
-          <label className="block font-semibold text-gray-700">Rol:</label>
-          <p className="text-gray-700">{profileData.role}</p>
         </div>
 
         {/* Campo de Contraseña Condicional */}
@@ -134,7 +136,7 @@ const Profile = () => {
 
         {/* Botón para Crear o Cambiar Contraseña */}
         <button
-          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition w-full font-bold"
           onClick={() => setIsPasswordChanging((prev) => !prev)}
         >
           {isPasswordChanging ? 'Cancelar' : hasPassword ? 'Cambiar Contraseña' : 'Crear Contraseña'}
@@ -145,14 +147,14 @@ const Profile = () => {
           {isEditing ? (
             <button
               onClick={handleSaveChanges}
-              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition"
+              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition w-full font-bold"
             >
               Guardar Cambios
             </button>
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-700 transition"
+              className="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-700 transition w-full font-bold"
             >
               Editar Perfil
             </button>

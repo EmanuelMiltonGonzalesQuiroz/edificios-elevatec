@@ -6,71 +6,53 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
-import { FaWhatsapp, FaRuler, FaBed, FaBath } from 'react-icons/fa';
+import { FaWhatsapp, FaRuler, FaBed, FaBath, FaMapMarkerAlt, FaPaste } from 'react-icons/fa';
+import data from '../../components/common/Text/data.json';
+import FileUploader from '../../components/Upload/FileUploader';
 
-const cities = [
-  { value: 'Santa Cruz', label: 'Santa Cruz' },
-  { value: 'La Paz', label: 'La Paz' },
-  { value: 'Cochabamba', label: 'Cochabamba' },
-  { value: 'El Alto', label: 'El Alto' },
-  { value: 'Oruro', label: 'Oruro' },
-  { value: 'Sucre', label: 'Sucre' },
-  { value: 'Tarija', label: 'Tarija' },
-  { value: 'Potosí', label: 'Potosí' },
-  { value: 'Trinidad', label: 'Trinidad' },
-  { value: 'Montero', label: 'Montero' },
-  { value: 'Quillacollo', label: 'Quillacollo' },
-  { value: 'Riberalta', label: 'Riberalta' },
-  { value: 'Guayaramerín', label: 'Guayaramerín' },
-  { value: 'Cobija', label: 'Cobija' },
-  { value: 'Yacuiba', label: 'Yacuiba' },
-  { value: 'Sacaba', label: 'Sacaba' },
-  { value: 'Camiri', label: 'Camiri' },
-  { value: 'Tupiza', label: 'Tupiza' },
-  { value: 'Villazón', label: 'Villazón' },
-  { value: 'San Ignacio de Velasco', label: 'San Ignacio de Velasco' },
-  { value: 'Warnes', label: 'Warnes' },
-  { value: 'Villa Montes', label: 'Villa Montes' },
-  { value: 'Llallagua', label: 'Llallagua' },
-  { value: 'Caranavi', label: 'Caranavi' },
-  { value: 'San Borja', label: 'San Borja' },
-  { value: 'Huanuni', label: 'Huanuni' },
-  { value: 'Punata', label: 'Punata' },
-  { value: 'Rurrenabaque', label: 'Rurrenabaque' },
-  { value: 'Uyuni', label: 'Uyuni' },
-  { value: 'Otra', label: 'Otra' }
+const currencyOptions = [
+  { value: 'USD', label: 'Dólar' },
+  { value: 'BOB', label: 'Boliviano' }
 ];
 
+const LabeledInput = ({ label, name, type, icon, placeholder, value, onChange }) => (
+  <div>
+    <label className="block text-gray-700 text-sm mb-1 flex items-center">
+      {icon && <span className="mr-1">{icon}</span>}
+      {label}
+    </label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      required
+      placeholder={placeholder}
+      className="w-full p-1 border rounded"
+    />
+  </div>
+);
 
-const transactionTypes = [
-  { value: 'venta', label: 'Venta' },
-  { value: 'preventa', label: 'Preventa' },
-  { value: 'alquiler', label: 'Alquiler' },
-  { value: 'anticretico', label: 'Anticrético' }
-];
+const SelectInput = ({ label, options, onChange, value }) => (
+  <div>
+    <label className="block text-gray-700 text-sm mb-1">{label}</label>
+    <Select
+      options={options}
+      onChange={onChange}
+      value={options.find(option => option.value === value)}
+      className="mb-2"
+    />
+  </div>
+);
 
-const placeTypes = [
-  { value: 'departamento', label: 'Departamento' },
-  { value: 'edificio', label: 'Edificio' },
-  { value: 'casa', label: 'Casa' },
-  { value: 'local', label: 'Local' },
-  { value: 'oficina', label: 'Oficina' }
-];
-
-const CreateAd = () => {
+const CreateAd = ({ onClose, onPostCreated }) => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!currentUser) {
-      navigate('/login');
-    }
-  }, [currentUser, navigate]);
-
-  const [formData, setFormData] = useState({
+  const initialState = {
     id: `ID-Publication-${uuidv4().slice(0, 8)}`,
     name: '',
     amount: '',
+    currency: 'USD',  
     contact: currentUser?.phone || '',
     description: '',
     transactionType: '',
@@ -88,45 +70,49 @@ const CreateAd = () => {
     uploadedAt: new Date().toISOString().split('T')[0],
     uploadedBy: currentUser?.uid || currentUser?.id || "",
     deletedBy: '',
-  });
+  };
 
+  const [formData, setFormData] = useState(initialState);
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    if (!currentUser) navigate('/login');
+  }, [currentUser, navigate]);
 
-  const handleCityChange = (selectedOption) => {
-    setFormData({ ...formData, city: selectedOption.value });
-  };
-
-  const handleTransactionTypeChange = (selectedOption) => {
-    setFormData({ ...formData, transactionType: selectedOption.value });
-  };
-
-  const handlePlaceTypeChange = (selectedOption) => {
-    setFormData({ ...formData, placeType: selectedOption.value });
-  };
-
-  const handleImageChange = (e) => {
-    setImages(e.target.files);
-  };
+  const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSelectChange = (name) => (selectedOption) => setFormData({ ...formData, [name]: selectedOption.value });
+  const handleImageChange = (e) => setImages(e.target.files);
 
   const handleUpload = async () => {
     setUploading(true);
-    const imageUrls = [];
-
-    for (const image of images) {
+    const imageUrls = await Promise.all([...images].map(async (image) => {
       const imageRef = ref(storage, `${formData.id}/${image.name}-${uuidv4()}`);
       await uploadBytes(imageRef, image);
-      const imageUrl = await getDownloadURL(imageRef);
-      imageUrls.push(imageUrl);
-    }
-
+      return await getDownloadURL(imageRef);
+    }));
+    setUploading(false);
     return imageUrls;
   };
 
+  const handlePasteCoordinates = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const coordinates = text.match(/-?\d+\.\d+/g);
+      if (coordinates && coordinates.length >= 2) {
+        setFormData({
+          ...formData,
+          latitude: coordinates[0],
+          longitude: coordinates[1],
+        });
+      } else {
+        alert('El sistema dice: No se detectaron coordenadas válidas en el portapapeles.');
+      }
+    } catch (error) {
+      console.error('Error al leer el portapapeles:', error);
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -139,102 +125,66 @@ const CreateAd = () => {
 
       await setDoc(doc(db, 'publications', formData.id), completeData);
       alert('Publicación creada exitosamente');
+      onClose();
+      setFormData(initialState);
+
+      if (onPostCreated) onPostCreated(); // Llama a onPostCreated después de crear la publicación
+
     } catch (error) {
       console.error('Error al crear la publicación:', error);
-    } finally {
-      setUploading(false);
     }
   };
-
-  // Función para renderizar un input con etiqueta y opcionalmente un icono
-  const renderLabeledInput = (label, name, type, icon, placeholder = '') => (
-    <div>
-      <label className="block text-gray-700 text-sm mb-1 flex items-center">
-        {icon && <span className="mr-1">{icon}</span>}
-        {label}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={formData[name]}
-        onChange={handleInputChange}
-        required
-        placeholder={placeholder}
-        className="w-full p-1 border rounded"
-      />
-    </div>
-  );
 
   return (
     <div className="p-4 min-w-[40vw] max-w-[90vw] mx-auto bg-white rounded-lg shadow-lg">
       <form onSubmit={handleSubmit} className="grid gap-4">
-        
-        {/* Nombre y Monto */}
-        <div className="grid grid-cols-2 gap-4">
-          {renderLabeledInput('Nombre', 'name', 'text', null, 'Ejemplo: Departamento de lujo')}
-          {renderLabeledInput('Monto', 'amount', 'text', null, 'Ejemplo: 120000')}
-        </div>
-
-        {/* Contacto */}
-        {renderLabeledInput('Contacto', 'contact', 'text', <FaWhatsapp className="text-green-600" />, 'Ejemplo: +59112345678')}
-
-        {/* Tipo de Lugar */}
-        <div>
-          <label className="block text-gray-700 text-sm mb-1">Tipo de Lugar</label>
-          <Select
-            options={placeTypes}
-            onChange={handlePlaceTypeChange}
-            className="mb-2"
-          />
-        </div>
-
-        {/* Tipo de Transacción */}
-        <div>
-          <label className="block text-gray-700 text-sm mb-1">Tipo de Transacción</label>
-          <Select
-            options={transactionTypes}
-            onChange={handleTransactionTypeChange}
-            className="mb-2"
-          />
-        </div>
-
-        {/* Ciudad */}
-        <div>
-          <label className="block text-gray-700 text-sm mb-1">Ciudad</label>
-          <Select
-            options={cities}
-            onChange={handleCityChange}
-            className="mb-2"
-          />
-          {formData.city === 'Otra' && (
-            <input
-              type="text"
-              name="customCity"
-              value={formData.customCity}
-              onChange={handleInputChange}
-              placeholder="Especifique la ciudad"
-              className="w-full p-1 border rounded"
-            />
-          )}
-        </div>
-
-        {/* Dirección */}
-        {renderLabeledInput('Dirección', 'address', 'text', null, 'Ejemplo: Av. Principal 123')}
-
-        {/* Habitaciones, Baños y Área */}
         <div className="grid grid-cols-3 gap-4">
-          {renderLabeledInput('Habitaciones', 'rooms', 'number', <FaBed />, 'Ejemplo: 3')}
-          {renderLabeledInput('Baños', 'bathrooms', 'number', <FaBath />, 'Ejemplo: 2')}
-          {renderLabeledInput('Área (m²)', 'area', 'number', <FaRuler />, 'Ejemplo: 120')}
+          <LabeledInput label="Nombre" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="Ejemplo: Departamento de lujo" />
+          <LabeledInput label="Monto" name="amount" type="text" value={formData.amount} onChange={handleInputChange} placeholder="Ejemplo: 120000" />
+          <SelectInput label="Moneda" options={currencyOptions} onChange={handleSelectChange('currency')} value={formData.currency} />
         </div>
 
-        {/* Coordenadas */}
+        <LabeledInput label="Contacto" name="contact" type="text" icon={<FaWhatsapp className="text-green-600" />} value={formData.contact} onChange={handleInputChange} placeholder="Ejemplo: +59112345678" />
+
+        <SelectInput label="Tipo de Lugar" options={data.placeTypes} onChange={handleSelectChange('placeType')} value={formData.placeType} />
+        <SelectInput label="Tipo de Transacción" options={data.transactionTypes} onChange={handleSelectChange('transactionType')} value={formData.transactionType} />
+        <SelectInput label="Ciudad" options={data.cities} onChange={handleSelectChange('city')} value={formData.city} />
+
+        {formData.city === 'Otra' && (
+          <LabeledInput label="Especifique la ciudad" name="customCity" type="text" value={formData.customCity} onChange={handleInputChange} />
+        )}
+
+        <LabeledInput label="Dirección" name="address" type="text" value={formData.address} onChange={handleInputChange} placeholder="Ejemplo: Av. Principal 123" />
+
+        <div className="grid grid-cols-3 gap-4">
+          <LabeledInput label="Habitaciones" name="rooms" type="number" icon={<FaBed />} value={formData.rooms} onChange={handleInputChange} placeholder="Ejemplo: 3" />
+          <LabeledInput label="Baños" name="bathrooms" type="number" icon={<FaBath />} value={formData.bathrooms} onChange={handleInputChange} placeholder="Ejemplo: 2" />
+          <LabeledInput label="Área (m²)" name="area" type="number" icon={<FaRuler />} value={formData.area} onChange={handleInputChange} placeholder="Ejemplo: 120" />
+        </div>
+
+        {/* Botón para abrir Google Maps y pegar coordenadas */}
+        <div className="flex flex-col gap-4 ">
+            <button
+              type="button"
+              onClick={() => window.open('https://www.google.com/maps', '_blank')}
+              className="bg-blue-500 text-white py-2 px-4 rounded flex items-center gap-2 hover:bg-blue-600"
+            >
+              <FaMapMarkerAlt /> Abrir Google Maps
+            </button>
+            <button
+              type="button"
+              onClick={handlePasteCoordinates}
+              className="bg-green-500 text-white py-2 px-4 rounded flex items-center gap-2 hover:bg-green-600"
+            >
+              <FaPaste /> Pegar Coordenadas
+            </button>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
-          {renderLabeledInput('Latitud', 'latitude', 'number', null, 'Ejemplo: -17.78629')}
-          {renderLabeledInput('Longitud', 'longitude', 'number', null, 'Ejemplo: -63.18117')}
+          <LabeledInput label="Latitud" name="latitude" type="text" value={formData.latitude} onChange={handleInputChange} placeholder="Ejemplo: -17.78629" />
+          <LabeledInput label="Longitud" name="longitude" type="text" value={formData.longitude} onChange={handleInputChange} placeholder="Ejemplo: -63.18117" />
         </div>
 
-        {/* Descripción */}
         <div>
           <label className="block text-gray-700 text-sm mb-1">Descripción</label>
           <textarea
@@ -247,18 +197,12 @@ const CreateAd = () => {
           />
         </div>
 
-        {/* Imágenes */}
-        <div>
-          <label className="block text-gray-700 text-sm mb-1">Imágenes</label>
-          <input
-            type="file"
-            multiple
-            onChange={handleImageChange}
-            className="w-full p-1 border rounded"
-          />
-        </div>
+        <FileUploader
+          label="Imágenes"
+          acceptedTypes={["image/*"]}
+          onChange={handleImageChange}
+        />
 
-        {/* Botón de Enviar */}
         <button
           type="submit"
           disabled={uploading}

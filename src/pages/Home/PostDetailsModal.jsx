@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { Carousel } from 'react-responsive-carousel';
-import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBath, FaMap, FaMapSigns, FaBuilding } from 'react-icons/fa';
+import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBath, FaMap, FaMapSigns, FaBuilding, FaTimes } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import EditButton from '../../components/UI/EditButton';
 import DeleteButton from '../../components/UI/DeleteButton';
@@ -15,6 +16,8 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
   const whatsappUrl = `https://wa.me/${publication.contact}?text=Hola, estoy interesado/a en el inmueble "${publication.name}". Descripción: ${publication.description}`;
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(publication.latitude)},${encodeURIComponent(publication.longitude)}`;
 
+  const currencySymbol = publication.currency === 'USD' ? '$' : 'Bs';
+
   const editFieldsConfig = [
     { label: 'Nombre', name: 'name', type: 'input', editable: true, validation: /^[a-zA-Z\s]+$/ },
     { label: 'Descripción', name: 'description', type: 'textarea', editable: true },
@@ -27,82 +30,85 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
     { label: 'Dirección', name: 'address', type: 'input', editable: true },
     { label: 'Tipo de Lugar', name: 'placeType', type: 'select', options: ['departamento', 'edificio', 'casa', 'local', 'oficina'], editable: true },
   ];
-  
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 ">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-5xl w-full flex flex-col sm:flex-row relative max-h-[90vh] overflow-auto">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 text-2xl">&times;</button>
 
-        {/* Detalles de la publicación */}
-        <div className="w-full sm:w-1/2 md:w-1/2 p-4 space-y-4 text-left">
-          <h3 className="text-2xl font-bold mb-4 text-gray-800">{publication.name}</h3>
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-gray-600">
-              <FaDollarSign />
-              <p className="text-gray-700">${publication.amount}</p>
+  return ReactDOM.createPortal (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full flex flex-col space-y-4 relative max-h-[90vh] overflow-auto">
+        
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 bg-red-500 p-2 rounded-full text-white hover:bg-red-600 transition"
+        >
+          <FaTimes size={16} />
+        </button>
+
+        <h3 className="text-3xl font-bold text-gray-800 text-center">{publication.name}</h3>
+
+        {/* Contenedor para los detalles y el carrusel en una sola columna */}
+        <div className="flex flex-col space-y-6">
+          
+          {/* Detalles de la publicación */}
+          <div className="space-y-2 text-gray-600 text-lg">
+            <div className="flex items-center space-x-2">
+              <FaDollarSign className="text-gray-700" />
+              <p className="text-gray-700 font-semibold">{currencySymbol}{publication.amount}</p>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
-              <FaMapMarkerAlt />
+            <div className="flex items-center space-x-2">
+              <FaMapMarkerAlt className="text-gray-700" />
               <p>{publication.city}</p>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
-              <FaBuilding />
+            <div className="flex items-center space-x-2">
+              <FaBuilding className="text-gray-700" />
               <p>Tipo de Lugar: {publication.placeType}</p>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
-              <FaMapSigns />
+            <div className="flex items-center space-x-2">
+              <FaMapSigns className="text-gray-700" />
               <p>Dirección: {publication.address}</p>
             </div>
-            <div className="flex items-center space-x-2 text-gray-600">
-              <FaHome />
+            <div className="flex items-center space-x-2">
+              <FaHome className="text-gray-700" />
               <p>Tipo: {publication.transactionType}</p>
             </div>
             {publication.area && (
-              <div className="flex items-center space-x-2 text-gray-600">
-                <FaRuler />
+              <div className="flex items-center space-x-2">
+                <FaRuler className="text-gray-700" />
                 <p>Área: {publication.area} m²</p>
               </div>
             )}
             {publication.rooms && (
-              <div className="flex items-center space-x-2 text-gray-600">
-                <FaBed />
+              <div className="flex items-center space-x-2">
+                <FaBed className="text-gray-700" />
                 <p>Habitaciones: {publication.rooms}</p>
               </div>
             )}
             {publication.bathrooms && (
-              <div className="flex items-center space-x-2 text-gray-600">
-                <FaBath />
+              <div className="flex items-center space-x-2">
+                <FaBath className="text-gray-700" />
                 <p>Baños: {publication.bathrooms}</p>
-              </div>
-            )}
-            {publication.description && (
-              <div className="text-gray-600">
-                <p>Descripción: {publication.description}</p>
               </div>
             )}
           </div>
 
-          {/* Botones de acción */}
-          <div className="flex flex-col space-y-2 mt-4">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition"
-            >
-              <FaWhatsapp className="mr-2" /> WhatsApp
-            </a>
-            <a
-              href={googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
-            >
-              <FaMap className="mr-2" /> Ver en Maps
-            </a>
+          {/* Carrusel de Imágenes */}
+          <div className="w-full">
+            <Carousel showThumbs={false} showIndicators={false} showStatus={false} infiniteLoop={true} className="rounded-lg overflow-hidden">
+              {publication.imageUrls?.map((url, index) => (
+                <div key={index} onClick={() => setSelectedImage(url)} className="w-full h-[400px]">
+                  <img src={url} alt={`Imagen de la publicación`} className="object-cover w-full h-full" />
+                </div>
+              ))}
+            </Carousel>
+          </div>
 
-            {/* Mostrar botones de edición, eliminación y habilitar/inactivar solo para administradores */}
-            {currentUser?.role === 'Administrador' && (
+          {/* Descripción */}
+          <div className="text-gray-700 text-lg">
+            <h4 className="font-semibold">Descripción:</h4>
+            <p>{publication.description}</p>
+          </div>
+
+          {/* Botones de acción (Editar, Habilitar/Inhabilitar, Eliminar) */}
+          {(currentUser?.role === 'Administrador' || currentUser?.uid === publication.uploadedBy) && (
+            <div>
               <div className="flex space-x-4 mt-4">
                 <EditButton 
                   row={publication} 
@@ -132,20 +138,53 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
                   collectionName="publications"
                   onDeleteSuccess={onDeletePublication}
                 />
+                
               </div>
-            )}
+              <div className="mt-6">
+            <h4 className="font-semibold text-gray-800">Personas que vieron el anuncio:</h4>
+            <div className="flex flex-col space-y-2 mt-2">
+              {publication.views?.map((viewer) => (
+                <div key={viewer} className="flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                  <span className="text-gray-800">{viewer}</span>
+                  <a
+                    href={`https://wa.me/${publication.contact}?text=Hola ${viewer}, al parecer estás interesado/a en el anuncio: ${publication.name}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600 transition"
+                  >
+                    <FaWhatsapp className="mr-1" /> Mensaje
+                  </a>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+            </div>
+            
+            
+          )}
 
-        {/* Carrusel de Imágenes */}
-        <div className="w-full sm:w-1/2 md:w-1/2 p-4">
-          <Carousel showThumbs={false} showIndicators={false} showStatus={false} infiniteLoop={true} className="rounded-lg overflow-hidden">
-            {publication.imageUrls?.map((url, index) => (
-              <div key={index} onClick={() => setSelectedImage(url)} className="w-full h-[500px]">
-                <img src={url} alt={`Imagen de la publicación`} className="object-cover w-full h-full" />
-              </div>
-            ))}
-          </Carousel>
+          {/* Lista de vistas con botón de WhatsApp */}
+          
+
+          {/* Botones de acción principales */}
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition font-semibold"
+            >
+              <FaWhatsapp className="mr-2" /> Contactar por WhatsApp
+            </a>
+            <a
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition font-semibold"
+            >
+              <FaMap className="mr-2" /> Ver en Google Maps
+            </a>
+          </div>
         </div>
       </div>
 
@@ -160,7 +199,8 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
 

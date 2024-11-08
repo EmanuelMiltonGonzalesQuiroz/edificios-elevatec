@@ -17,7 +17,7 @@ const Home = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Header onApplyFilters={handleApplyFilters} onClearFilters={handleClearFilters} />
-      <main className="flex-grow flex flex-col items-center p-4 w-full sm:w-3/4 lg:w-1/2 mx-auto">
+      <main className="flex-grow flex flex-col items-center p-4 mx-auto">
         <PostFeed filters={filters} />
       </main>
       <Footer />

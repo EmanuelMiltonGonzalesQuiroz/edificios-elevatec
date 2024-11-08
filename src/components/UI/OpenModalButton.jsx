@@ -16,6 +16,7 @@ const OpenModalButton = ({ buttonText, icon: Icon, modalContent: ModalContent, t
       </button>
       
       <Modal isOpen={isOpen} onClose={handleClose} title={title}>
+        {/* Pasamos onClose para cerrar el modal después de aplicar filtros */}
         <ModalContent onClose={handleClose} />
       </Modal>
     </>

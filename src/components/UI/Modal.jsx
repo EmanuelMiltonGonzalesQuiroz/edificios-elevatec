@@ -13,7 +13,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
           <button
             onClick={onClose}
-            className="bg-red-600 p-2 rounded-full text-white hover:bg-red-700 transition"
+            className="bg-red-500 p-2 rounded-full text-white hover:bg-red-500 transition" // Cambiado a rojo
           >
             <FaTimes size={16} />
           </button>
@@ -25,10 +25,10 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         </div>
 
         {/* Botón de Cancelar */}
-        <div className="flex ">
+        <div className="flex">
           <button
             onClick={onClose}
-            className="bg-gray-300 w-full text-gray-700 py-2 px-4 rounded hover:bg-gray-400 transition"
+            className="bg-red-500 w-full text-white font-bold py-2 px-4 rounded hover:bg-gray-400 transition"
           >
             Cerrar
           </button>

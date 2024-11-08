@@ -31,12 +31,12 @@ const MenuSidebar = ({ isOpen, onClose }) => {
           icon={FaUserCircle}
           buttonText="Perfil"
           modalContent={Profile}
-          title="Perfil de Usuario"
+          title="Perfil"
           className="flex items-center space-x-3 text-white bg-gray-500 hover:bg-gray-600 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
         />
 
         {/* Botón Publicar Anuncio */}
-        {currentUser.role !== "Usuario" && (
+        {currentUser?.role !== "Usuario" && (
             <OpenModalButton
             icon={FaPlus}
             buttonText="Publicar Anuncio"

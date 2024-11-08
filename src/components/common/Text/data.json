@@ -1,0 +1,48 @@
+{
+    "cities": [
+      { "value": "Santa Cruz", "label": "Santa Cruz" },
+      { "value": "La Paz", "label": "La Paz" },
+      { "value": "Cochabamba", "label": "Cochabamba" },
+      { "value": "El Alto", "label": "El Alto" },
+      { "value": "Oruro", "label": "Oruro" },
+      { "value": "Sucre", "label": "Sucre" },
+      { "value": "Tarija", "label": "Tarija" },
+      { "value": "Potosí", "label": "Potosí" },
+      { "value": "Trinidad", "label": "Trinidad" },
+      { "value": "Montero", "label": "Montero" },
+      { "value": "Quillacollo", "label": "Quillacollo" },
+      { "value": "Riberalta", "label": "Riberalta" },
+      { "value": "Guayaramerín", "label": "Guayaramerín" },
+      { "value": "Cobija", "label": "Cobija" },
+      { "value": "Yacuiba", "label": "Yacuiba" },
+      { "value": "Sacaba", "label": "Sacaba" },
+      { "value": "Camiri", "label": "Camiri" },
+      { "value": "Tupiza", "label": "Tupiza" },
+      { "value": "Villazón", "label": "Villazón" },
+      { "value": "San Ignacio de Velasco", "label": "San Ignacio de Velasco" },
+      { "value": "Warnes", "label": "Warnes" },
+      { "value": "Villa Montes", "label": "Villa Montes" },
+      { "value": "Llallagua", "label": "Llallagua" },
+      { "value": "Caranavi", "label": "Caranavi" },
+      { "value": "San Borja", "label": "San Borja" },
+      { "value": "Huanuni", "label": "Huanuni" },
+      { "value": "Punata", "label": "Punata" },
+      { "value": "Rurrenabaque", "label": "Rurrenabaque" },
+      { "value": "Uyuni", "label": "Uyuni" },
+      { "value": "Otra", "label": "Otra" }
+    ],
+    "transactionTypes": [
+      { "value": "venta", "label": "Venta" },
+      { "value": "preventa", "label": "Preventa" },
+      { "value": "alquiler", "label": "Alquiler" },
+      { "value": "anticretico", "label": "Anticrético" }
+    ],
+    "placeTypes": [
+      { "value": "departamento", "label": "Departamento" },
+      { "value": "edificio", "label": "Edificio" },
+      { "value": "casa", "label": "Casa" },
+      { "value": "local", "label": "Local" },
+      { "value": "oficina", "label": "Oficina" }
+    ]
+  }
+  

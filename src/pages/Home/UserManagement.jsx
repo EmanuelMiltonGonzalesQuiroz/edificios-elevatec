@@ -13,7 +13,7 @@ const UserManagement = () => {
     { label: 'Nombre', name: 'username', type: 'input', editable: true, validation: /^[a-zA-Z\s]+$/ },
     { label: 'Email', name: 'email', type: 'input', editable: false }, // Solo lectura
     { label: 'Teléfono', name: 'phone', type: 'input', editable: true, validation: /^[0-9]+$/ },
-    { label: 'Rol', name: 'role', type: 'select', options: ['Usuario', 'Administrador', 'Gerencia', 'Inmobiliario', 'Inmobiliario Plus', 'Edificio'], editable: true },
+    { label: 'Rol', name: 'role', type: 'select', options: ['Usuario', 'Administrador', 'Gerencia', 'Inmobiliario', 'Inmobiliario Plus', 'Cliente'], editable: true },
   ]);
 
   useEffect(() => {
