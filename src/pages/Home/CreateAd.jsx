@@ -15,7 +15,7 @@ const currencyOptions = [
   { value: 'BOB', label: 'Boliviano' }
 ];
 
-const LabeledInput = ({ label, name, type, icon, placeholder, value, onChange }) => (
+const LabeledInput = ({ label, name, type, icon, placeholder, value, onChange, isRequired = true }) => (
   <div>
     <label className="block text-gray-700 text-sm mb-1 flex items-center">
       {icon && <span className="mr-1">{icon}</span>}
@@ -26,12 +26,13 @@ const LabeledInput = ({ label, name, type, icon, placeholder, value, onChange })
       name={name}
       value={value}
       onChange={onChange}
-      required
+      required={isRequired} // Usa isRequired para controlar si es requerido o no
       placeholder={placeholder}
       className="w-full p-1 border rounded"
     />
   </div>
 );
+
 
 const SelectInput = ({ label, options, onChange, value }) => (
   <div>
@@ -138,11 +139,12 @@ const CreateAd = ({ onClose, onPostCreated }) => {
   return (
     <div className="p-4 min-w-[40vw] max-w-[90vw] mx-auto bg-white rounded-lg shadow-lg">
       <form onSubmit={handleSubmit} className="grid gap-4">
-        <div className="grid grid-cols-3 gap-4">
-          <LabeledInput label="Nombre" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="Ejemplo: Departamento de lujo" />
-          <LabeledInput label="Monto" name="amount" type="text" value={formData.amount} onChange={handleInputChange} placeholder="Ejemplo: 120000" />
-          <SelectInput label="Moneda" options={currencyOptions} onChange={handleSelectChange('currency')} value={formData.currency} />
-        </div>
+      <div className="grid sm:grid-cols-3 grid-cols-1 gap-4">
+        <LabeledInput label="Nombre" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="Ejemplo: Departamento de lujo" />
+        <LabeledInput label="Monto" name="amount" type="text" value={formData.amount} onChange={handleInputChange} placeholder="Ejemplo: 120000" isRequired={false} />
+        <SelectInput label="Moneda" options={currencyOptions} onChange={handleSelectChange('currency')} value={formData.currency} />
+      </div>
+
 
         <LabeledInput label="Contacto" name="contact" type="text" icon={<FaWhatsapp className="text-green-600" />} value={formData.contact} onChange={handleInputChange} placeholder="Ejemplo: +59112345678" />
 
@@ -156,7 +158,7 @@ const CreateAd = ({ onClose, onPostCreated }) => {
 
         <LabeledInput label="Dirección" name="address" type="text" value={formData.address} onChange={handleInputChange} placeholder="Ejemplo: Av. Principal 123" />
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-3 grid-cols-1 gap-4">
           <LabeledInput label="Habitaciones" name="rooms" type="number" icon={<FaBed />} value={formData.rooms} onChange={handleInputChange} placeholder="Ejemplo: 3" />
           <LabeledInput label="Baños" name="bathrooms" type="number" icon={<FaBath />} value={formData.bathrooms} onChange={handleInputChange} placeholder="Ejemplo: 2" />
           <LabeledInput label="Área (m²)" name="area" type="number" icon={<FaRuler />} value={formData.area} onChange={handleInputChange} placeholder="Ejemplo: 120" />

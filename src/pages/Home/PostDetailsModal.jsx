@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import ReactDOM from 'react-dom';
 import { Carousel } from 'react-responsive-carousel';
-import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBath, FaMap, FaMapSigns, FaBuilding, FaTimes } from 'react-icons/fa';
+import { FaWhatsapp, FaMapMarkerAlt, FaHome, FaDollarSign, FaRuler, FaBed, FaBath, FaMap, FaMapSigns, FaBuilding, FaTimes, FaHeart } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import EditButton from '../../components/UI/EditButton';
 import DeleteButton from '../../components/UI/DeleteButton';
 import DisableButton from '../../components/UI/DisableButton';
 import EnableButton from '../../components/UI/EnableButton';
 import { useAuth } from '../../context/AuthContext';
+import { db } from '../../connection/firebase';
+import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 
 const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeletePublication }) => {
   const { currentUser } = useAuth();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [viewers, setViewers] = useState([]);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const whatsappUrl = `https://wa.me/${publication.contact}?text=Hola, estoy interesado/a en el inmueble "${publication.name}". Descripción: ${publication.description}`;
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(publication.latitude)},${encodeURIComponent(publication.longitude)}`;
@@ -30,10 +34,42 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
     { label: 'Dirección', name: 'address', type: 'input', editable: true },
     { label: 'Tipo de Lugar', name: 'placeType', type: 'select', options: ['departamento', 'edificio', 'casa', 'local', 'oficina'], editable: true },
   ];
+  useEffect(() => {
+    const fetchViewers = async () => {
+      const viewerData = await Promise.all(
+        publication.views.map(async (viewerId) => {
+          const viewerRef = doc(db, 'users', viewerId);
+          const viewerSnap = await getDoc(viewerRef);
+          return viewerSnap.exists() ? viewerSnap.data() : { id: viewerId, username: 'Usuario desconocido' };
+        })
+      );
+      setViewers(viewerData);
+    };
+
+    if (publication.views && publication.views.length > 0) {
+      fetchViewers();
+      // Verificar si el usuario actual ya es un "favorito"
+      setIsFavorite(publication.views.includes(currentUser?.uid));
+    }
+  }, [publication.views, currentUser?.uid]);
+  const handleAddToFavorites = async () => {
+    if (!currentUser) return;
+
+    const publicationRef = doc(db, 'publications', publication.id);
+    try {
+      await updateDoc(publicationRef, {
+        views: arrayUnion(currentUser.uid),
+      });
+      setIsFavorite(true);
+      setViewers((prevViewers) => [...prevViewers, { id: currentUser.uid, username: currentUser.username }]);
+    } catch (error) {
+      console.error('Error al añadir a favoritos:', error);
+    }
+  };
 
   return ReactDOM.createPortal (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full flex flex-col space-y-4 relative max-h-[90vh] overflow-auto">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full flex flex-col space-y-4 relative max-h-[90vh] ">
         
         <button
           onClick={onClose}
@@ -45,7 +81,7 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
         <h3 className="text-3xl font-bold text-gray-800 text-center">{publication.name}</h3>
 
         {/* Contenedor para los detalles y el carrusel en una sola columna */}
-        <div className="flex flex-col space-y-6">
+        <div className="flex flex-col space-y-6 overflow-auto">
           
           {/* Detalles de la publicación */}
           <div className="space-y-2 text-gray-600 text-lg">
@@ -59,7 +95,7 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
             </div>
             <div className="flex items-center space-x-2">
               <FaBuilding className="text-gray-700" />
-              <p>Tipo de Lugar: {publication.placeType}</p>
+              <p>{publication.placeType}</p>
             </div>
             <div className="flex items-center space-x-2">
               <FaMapSigns className="text-gray-700" />
@@ -67,7 +103,7 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
             </div>
             <div className="flex items-center space-x-2">
               <FaHome className="text-gray-700" />
-              <p>Tipo: {publication.transactionType}</p>
+              <p>{publication.transactionType}</p>
             </div>
             {publication.area && (
               <div className="flex items-center space-x-2">
@@ -184,6 +220,12 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
             >
               <FaMap className="mr-2" /> Ver en Google Maps
             </a>
+            <button
+              onClick={handleAddToFavorites}
+              className="flex items-center justify-center bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition font-semibold"
+            >
+              <FaHeart className="mr-2" /> Añadir a Favoritos
+            </button>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../../connection/firebase';
-import { collection, query, where, getDocs, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, query, where, getDocs} from 'firebase/firestore';
 import { Carousel } from 'react-responsive-carousel';
 import { FaMapMarkerAlt, FaHome, FaMapSigns, FaBuilding } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -67,19 +67,6 @@ const PostFeed = ({ filters }) => {
     }
 
     setSelectedPublication(publication);
-
-    try {
-      if (currentUser.uid) {
-        const publicationRef = doc(db, 'publications', publication.id);
-        await updateDoc(publicationRef, {
-          views: arrayUnion(currentUser.uid || currentUser.id),
-        });
-      } else {
-        console.error('Error: currentUser.uid está indefinido.');
-      }
-    } catch (error) {
-      console.error('Error al registrar la vista:', error);
-    }
   };
 
   if (loading) return <p className="text-center text-gray-500">Cargando publicaciones...</p>;
@@ -98,31 +85,34 @@ const PostFeed = ({ filters }) => {
                   handlePublicationClick(pub);
                 }
               }}
-              className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl cursor-pointer"
-              style={{ width: '400px', height: '300px' }}
+              className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl cursor-pointer "
+              style={{ height: '300px' }}
             >
               <div className="grid grid-cols-2 gap-4 h-full">
                 {/* Primera columna con la información */}
-                <div>
+                <div className="overflow-auto">
                   <h3 className="text-xl font-bold mb-2 text-gray-800">{pub.name}</h3>
+                  
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                    <FaMapMarkerAlt />
+                    <FaMapMarkerAlt className="w-4 h-4 flex-shrink-0" />
                     <p>{pub.city}</p>
                   </div>
+
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                    <FaBuilding />
+                    <FaBuilding className="w-4 h-4 flex-shrink-0" />
                     <p>Inmueble: {pub.placeType}</p>
                   </div>
+
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                    <FaMapSigns />
+                    <FaMapSigns className="w-4 h-4 flex-shrink-0" />
                     <p>Dirección: {pub.address}</p>
                   </div>
+
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
-                    <FaHome />
+                    <FaHome className="w-4 h-4 flex-shrink-0" />
                     <p>Contrato: {pub.transactionType}</p>
                   </div>
                 </div>
-
                 {/* Segunda columna con el carrusel */}
                 <div>
                   {pub.imageUrls && pub.imageUrls.length > 0 ? (

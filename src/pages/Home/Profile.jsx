@@ -5,7 +5,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, login } = useAuth(); // Accedemos a login del contexto
   const navigate = useNavigate();
   
   const [profileData, setProfileData] = useState({
@@ -20,11 +20,10 @@ const Profile = () => {
   const [password, setPassword] = useState('');
   const [isPasswordChanging, setIsPasswordChanging] = useState(false);
 
-
   useEffect(() => {
     if (!currentUser) {
       navigate('/login');
-      return; // Se asegura de detener la ejecución si no hay usuario
+      return; // Detenemos la ejecución si no hay usuario
     }
 
     const fetchUserProfile = async () => {
@@ -59,6 +58,14 @@ const Profile = () => {
         ...profileData,
         ...(isPasswordChanging && { password }), // Solo agrega la contraseña si está cambiando
       });
+
+      // Actualizar currentUser en el contexto de autenticación
+      login({
+        ...currentUser,
+        ...profileData,
+        ...(isPasswordChanging && { password }), // Incluye la nueva contraseña si fue actualizada
+      });
+
       alert('Perfil actualizado correctamente.');
       setIsEditing(false);
       setIsPasswordChanging(false); // Reinicia el estado de cambio de contraseña

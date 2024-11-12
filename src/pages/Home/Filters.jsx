@@ -27,7 +27,6 @@ const Filters = ({ onApplyFilters, onClose }) => {
         {/* Tipo de Transacción */}
         <label>Tipo de Transacción</label>
         <select name="transactionType" value={filters.transactionType} onChange={handleChange} className="w-full p-2 border rounded">
-          <option value="">Todos</option>
           <option value="venta">Venta</option>
           <option value="alquiler">Alquiler</option>
           <option value="anticretico">Anticrético</option>
