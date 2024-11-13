@@ -7,6 +7,7 @@ import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import PostDetailsModal from './PostDetailsModal';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { checkSetting } from './CheckSetting';
 
 const PostFeed = ({ filters }) => {
   const [publications, setPublications] = useState([]);
@@ -61,7 +62,8 @@ const PostFeed = ({ filters }) => {
   }, [fetchPublications]);
 
   const handlePublicationClick = async (publication) => {
-    if (!currentUser) {
+    const permission = await checkSetting("publishDetail")
+    if (!currentUser && permission === false ) {
       navigate('/login');
       return;
     }

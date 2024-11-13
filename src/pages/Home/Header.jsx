@@ -46,7 +46,7 @@ const Header = ({ onApplyFilters, onClearFilters }) => {
           {/* Botón de Quitar Filtros */}
           <button
             onClick={onClearFilters}
-            className="flex items-center space-x-2 bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition max-w-[150px]"
+            className="flex items-center space-x-2 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition max-w-[150px]"
           >
             <div className="flex items-center justify-center w-6 h-6 bg-red-500 rounded-full">
               <FaTimesCircle className="text-red text-xl" /> {/* Ajuste de color de la X */}

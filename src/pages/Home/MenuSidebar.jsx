@@ -61,7 +61,7 @@ const MenuSidebar = ({ isOpen, onClose }) => {
             <OpenModalButton
               icon={FaCog}
               buttonText="Ajustes"
-              modalContent={SettingsModal }
+              modalContent={(props) => <SettingsModal onClose={props.onClose} />}
               title="Ajustes"
               className="flex items-center space-x-3 text-white bg-gradient-to-r from-gray-500 to-gray-700 hover:bg-gray-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
             />

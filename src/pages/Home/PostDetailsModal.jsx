@@ -199,34 +199,32 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
             
           )}
 
-          {/* Lista de vistas con botón de WhatsApp */}
-          
-
-          {/* Botones de acción principales */}
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition font-semibold"
-            >
-              <FaWhatsapp className="mr-2" /> Contactar por WhatsApp
-            </a>
-            <a
-              href={googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition font-semibold"
-            >
-              <FaMap className="mr-2" /> Ver en Google Maps
-            </a>
-            <button
-              onClick={handleAddToFavorites}
-              className="flex items-center justify-center bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition font-semibold"
-            >
-              <FaHeart className="mr-2" /> Añadir a Favoritos
-            </button>
-          </div>
+          {currentUser && (
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition font-semibold"
+              >
+                <FaWhatsapp className="mr-2" /> Contactar por WhatsApp
+              </a>
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition font-semibold"
+              >
+                <FaMap className="mr-2" /> Ver en Google Maps
+              </a>
+              <button
+                onClick={handleAddToFavorites}
+                className="flex items-center justify-center bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition font-semibold"
+              >
+                <FaHeart className="mr-2" /> Añadir a Favoritos
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

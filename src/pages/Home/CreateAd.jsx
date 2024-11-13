@@ -9,11 +9,7 @@ import Select from 'react-select';
 import { FaWhatsapp, FaRuler, FaBed, FaBath, FaMapMarkerAlt, FaPaste } from 'react-icons/fa';
 import data from '../../components/common/Text/data.json';
 import FileUploader from '../../components/Upload/FileUploader';
-
-const currencyOptions = [
-  { value: 'USD', label: 'Dólar' },
-  { value: 'BOB', label: 'Boliviano' }
-];
+import DatabaseSelectInput from '../../components/layout/DatabaseSelectInput';
 
 const LabeledInput = ({ label, name, type, icon, placeholder, value, onChange, isRequired = true }) => (
   <div>
@@ -135,6 +131,10 @@ const CreateAd = ({ onClose, onPostCreated }) => {
       console.error('Error al crear la publicación:', error);
     }
   };
+  
+  const handleCurrencyChange = (e) => {
+    setFormData({ ...formData, currency: e.target.value });
+  };
 
   return (
     <div className="p-4 min-w-[40vw] max-w-[90vw] mx-auto bg-white rounded-lg shadow-lg">
@@ -142,14 +142,40 @@ const CreateAd = ({ onClose, onPostCreated }) => {
       <div className="grid sm:grid-cols-3 grid-cols-1 gap-4">
         <LabeledInput label="Nombre" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="Ejemplo: Departamento de lujo" />
         <LabeledInput label="Monto" name="amount" type="text" value={formData.amount} onChange={handleInputChange} placeholder="Ejemplo: 120000" isRequired={false} />
-        <SelectInput label="Moneda" options={currencyOptions} onChange={handleSelectChange('currency')} value={formData.currency} />
+        <div className="flex flex-col">
+          <label className="block text-gray-700 text-sm mb-1">Moneda</label>
+          <div className="flex space-x-4">
+            <label className="flex items-center space-x-1">
+              <input
+                type="radio"
+                name="currency"
+                value="USD"
+                checked={formData.currency === 'USD'}
+                onChange={handleCurrencyChange}
+                className="form-radio"
+              />
+              <span>Dólar</span>
+            </label>
+            <label className="flex items-center space-x-1">
+              <input
+                type="radio"
+                name="currency"
+                value="BOB"
+                checked={formData.currency === 'BOB'}
+                onChange={handleCurrencyChange}
+                className="form-radio"
+              />
+              <span>Boliviano</span>
+            </label>
+          </div>
+        </div>
       </div>
 
 
         <LabeledInput label="Contacto" name="contact" type="text" icon={<FaWhatsapp className="text-green-600" />} value={formData.contact} onChange={handleInputChange} placeholder="Ejemplo: +59112345678" />
 
-        <SelectInput label="Tipo de Lugar" options={data.placeTypes} onChange={handleSelectChange('placeType')} value={formData.placeType} />
-        <SelectInput label="Tipo de Transacción" options={data.transactionTypes} onChange={handleSelectChange('transactionType')} value={formData.transactionType} />
+        <DatabaseSelectInput label="Tipo de Lugar" documentName="placeTypes" onChange={handleSelectChange('placeType')} value={formData.placeType} />
+        <DatabaseSelectInput label="Tipo de Transacción" documentName="contractTypes" onChange={handleSelectChange('transactionType')} value={formData.transactionType} />
         <SelectInput label="Ciudad" options={data.cities} onChange={handleSelectChange('city')} value={formData.city} />
 
         {formData.city === 'Otra' && (

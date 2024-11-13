@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
+import DatabaseSelectInput from '../../components/layout/DatabaseSelectInput';
 
 const Filters = ({ onApplyFilters, onClose }) => {
   const [filters, setFilters] = useState({
     transactionType: '',
+    placeType: '',
     priceMin: '',
     priceMax: '',
     rooms: '',
     bathrooms: '',
     areaMin: '',
-    areaMax: ''
+    areaMax: '',
+    currency: '',
+    state: '',
+    city: ''
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+  };
+
+  const handleSelectChange = (name) => (selectedOption) => {
+    setFilters((prevFilters) => ({ ...prevFilters, [name]: selectedOption.value }));
   };
 
   const applyFilters = () => {
@@ -25,13 +34,20 @@ const Filters = ({ onApplyFilters, onClose }) => {
     <div className="p-4">
       <div className="space-y-2">
         {/* Tipo de Transacción */}
-        <label>Tipo de Transacción</label>
-        <select name="transactionType" value={filters.transactionType} onChange={handleChange} className="w-full p-2 border rounded">
-          <option value="venta">Venta</option>
-          <option value="alquiler">Alquiler</option>
-          <option value="anticretico">Anticrético</option>
-          <option value="preventa">Preventa</option>
-        </select>
+        <DatabaseSelectInput
+          label="Tipo de Transacción"
+          documentName="contractTypes"
+          onChange={handleSelectChange('transactionType')}
+          value={filters.transactionType}
+        />
+
+        {/* Tipo de Lugar */}
+        <DatabaseSelectInput
+          label="Tipo de Lugar"
+          documentName="placeTypes"
+          onChange={handleSelectChange('placeType')}
+          value={filters.placeType}
+        />
 
         {/* Rango de Precio */}
         <label>Rango de Precio</label>
@@ -75,6 +91,7 @@ const Filters = ({ onApplyFilters, onClose }) => {
           className="w-full p-2 border rounded"
         />
 
+        {/* Área */}
         <label>Área (m²)</label>
         <div className="flex space-x-2">
           <input
@@ -94,6 +111,32 @@ const Filters = ({ onApplyFilters, onClose }) => {
             className="w-1/2 p-2 border rounded"
           />
         </div>
+
+        {/* Moneda */}
+        <label>Moneda</label>
+        <select
+          name="currency"
+          value={filters.currency}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+        >
+          <option value="">Selecciona</option>
+          <option value="USD">Dólar (USD)</option>
+          <option value="BOB">Boliviano (BOB)</option>
+        </select>
+
+        {/* Estado */}
+        <label>Estado</label>
+        <select
+          name="state"
+          value={filters.state}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+        >
+          <option value="">Selecciona</option>
+          <option value="priority">Prioridad</option>
+          <option value="active">Activo</option>
+        </select>
 
         {/* Botón de Aplicar Filtros */}
         <button onClick={applyFilters} className="bg-blue-600 text-white py-2 w-full px-4 rounded hover:bg-blue-700 transition mt-4">
