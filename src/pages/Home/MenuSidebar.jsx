@@ -77,13 +77,16 @@ const MenuSidebar = ({ isOpen, onClose }) => {
         />
 
         {/* Botón Ver Publicaciones */}
-        <OpenModalButton
-          icon={FaList}
-          buttonText="Ver Publicaciones"
-          modalContent={PublishedPosts}
-          title="Mis Publicaciones"
-          className="flex items-center space-x-3 text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:bg-teal-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
-        />
+        {currentUser?.role === 'Administrador' && (
+          <OpenModalButton
+            icon={FaList}
+            buttonText="Mis Publicaciones"
+            modalContent={PublishedPosts}
+            title="Mis Publicaciones"
+            className="flex items-center space-x-3 text-white bg-gradient-to-r from-teal-500 to-teal-700 hover:bg-teal-800 p-3 rounded-lg w-full text-base font-medium shadow-md hover:shadow-lg transition"
+          />
+        )}
+
 
         {/* Botón de Cerrar Sesión */}
         {currentUser && (
