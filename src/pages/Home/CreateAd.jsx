@@ -63,6 +63,7 @@ const CreateAd = ({ onClose, onPostCreated }) => {
     area: '',
     latitude: '',
     longitude: '',
+    ownerid:currentUser.ownerUid || "",    
     state: (currentUser?.role === 'Administrador' || currentUser?.role === 'Inmobiliario Plus') ? 'priority' : 'active',
     uploadedAt: new Date().toISOString().split('T')[0],
     uploadedBy: currentUser?.uid || currentUser?.id || "",

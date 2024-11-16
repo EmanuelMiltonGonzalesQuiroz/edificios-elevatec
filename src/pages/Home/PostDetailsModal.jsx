@@ -143,7 +143,7 @@ const PostDetailsModal = ({ publication, onClose, onUpdatePublication, onDeleteP
           </div>
 
           {/* Botones de acción (Editar, Habilitar/Inhabilitar, Eliminar) */}
-          {(currentUser?.role === 'Administrador' || currentUser?.uid === publication.uploadedBy) && (
+          {(currentUser?.role === 'Administrador' || currentUser?.uid === publication.uploadedBy || currentUser?.uid === publication.ownerid )  && (
             <div>
               <div className="flex space-x-4 mt-4">
                 <EditButton 

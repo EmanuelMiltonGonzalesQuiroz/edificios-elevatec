@@ -8,10 +8,12 @@ import Modal from '../../components/UI/Modal'; // Importa el componente de Modal
 import AddUserModal from './AddUserModal'; // Importa el modal para agregar usuario
 import { db } from '../../connection/firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { useAuth } from '../../context/AuthContext';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -48,21 +50,31 @@ const UserManagement = () => {
     setUsers(users.filter((user) => user.id !== deletedUserId));
   };
 
+  // Filtrar usuarios si el usuario actual tiene el rol "Edificio"
+  const filteredUsers =
+    currentUser?.role === 'Edificio'
+      ? users.filter((user) => user.ownerId === currentUser.id) // Mostrar solo usuarios que tienen como owner al actual
+      : users;
+
   return (
     <div className="p-4 min-w-[60vw] text-black">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Gestión de Usuarios</h2>
-        <button
-          onClick={() => setIsAddUserModalOpen(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          + Agregar Usuario
-        </button>
+        {(currentUser?.role === 'Administrador') && (
+          <button
+            onClick={() => setIsAddUserModalOpen(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            disabled={currentUser?.role === 'Edificio'} // Usuarios "Edificio" no pueden agregar usuarios
+          >
+            + Agregar Usuario
+          </button>
+        )}
+        
       </div>
 
       <Table
-        columnTitles={['Nombre', 'Email', 'Teléfono']}
-        data={users}
+        columnTitles={['Nombre', 'Email', 'Teléfono', 'Rol']}
+        data={filteredUsers}
         hasIndex={true}
         rowClass={(user) => (user.state === 'inactive' ? 'bg-red-200' : '')}
         buttons={[
@@ -72,10 +84,33 @@ const UserManagement = () => {
               onUpdateSuccess={handleUpdateSuccess}
               collectionName="users"
               fieldsConfig={[
-                { label: 'Nombre', name: 'username', type: 'input', editable: true, validation: /^[a-zA-Z\s]+$/ },
-                { label: 'Email', name: 'email', type: 'input', editable: false },
-                { label: 'Teléfono', name: 'phone', type: 'input', editable: true, validation: /^[0-9]+$/ },
-                { label: 'Rol', name: 'role', type: 'select', options: ['Usuario', 'Administrador', 'Gerencia', 'Inmobiliario', 'Inmobiliario Plus', 'Cliente'], editable: true },
+                {
+                  label: 'Nombre',
+                  name: 'username',
+                  type: 'input',
+                  editable: true,
+                  validation: /^[a-zA-Z\s]+$/,
+                },
+                {
+                  label: 'Email',
+                  name: 'email',
+                  type: 'input',
+                  editable: false,
+                },
+                {
+                  label: 'Teléfono',
+                  name: 'phone',
+                  type: 'input',
+                  editable: true,
+                  validation: /^[0-9]+$/,
+                },
+                {
+                  label: 'Rol',
+                  name: 'role',
+                  type: 'select',
+                  options: ['Usuario', 'Administrador', 'Gerencia', 'Inmobiliario', 'Inmobiliario Plus', 'Edificio'],
+                  editable: currentUser?.role !== 'Edificio', // Usuarios "Edificio" no pueden editar roles
+                },
               ]}
             />
           ),

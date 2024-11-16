@@ -49,7 +49,7 @@ const MenuSidebar = ({ isOpen, onClose }) => {
         )}
         
         {/* Botón Usuarios (solo para Administrador) */}
-        {currentUser?.role === 'Administrador' && (
+        {(currentUser?.role === 'Administrador' || currentUser?.role === 'Edificio') && (
           <div className='space-y-4'>
             <OpenModalButton
               icon={FaUsers}

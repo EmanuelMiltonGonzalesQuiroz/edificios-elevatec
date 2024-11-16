@@ -88,15 +88,15 @@ const PostFeed = ({ filters }) => {
                 }
               }}
               className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl cursor-pointer "
-              style={{ height: '300px' }}
+              style={{ height: '400px' }}
             >
-              <div className="max-h-[40px] overflow-auto">
+              <div className="max-h-[320px] overflow-auto">
                 <h3 className="text-x font-bold mb-2 text-gray-800">{pub.name}</h3>
               </div>
               <div className="grid grid-cols-2 gap-4 ">
                 {/* Primera columna con la información */}
                 
-                <div className="overflow-auto max-h-[220px]">
+                <div className="overflow-auto max-h-[280px]">
                   
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
                     <FaMapMarkerAlt className="w-4 h-4 flex-shrink-0" />
@@ -127,12 +127,12 @@ const PostFeed = ({ filters }) => {
                       showStatus={false}
                       dynamicHeight={true}
                       infiniteLoop={true}
-                      className="mt-4 max-h-[200px] min-h-[200px] rounded-lg overflow-hidden carousel-root"
+                      className="mt-4 max-h-[280px] min-h-[280px] rounded-lg overflow-hidden carousel-root"
                       lazyLoad={true}
                     >
                       {pub.imageUrls.map((url, index) => (
                         <div key={url} className="cursor-pointer">
-                          <img src={url} alt={`Imagen ${index + 1}`} className="object-cover rounded-lg max-h-[200px] min-h-[200px]" />
+                          <img src={url} alt={`Imagen ${index + 1}`} className="object-cover rounded-lg max-h-[280px] min-h-[280px]" />
                         </div>
                       ))}
                     </Carousel>

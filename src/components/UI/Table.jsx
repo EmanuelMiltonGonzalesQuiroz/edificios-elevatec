@@ -22,6 +22,7 @@ const Table = ({ columnTitles, data, hasIndex = false, buttons = [] }) => {
               <td className="px-4 py-2 border text-center">{row.username}</td>
               <td className="px-4 py-2 border text-center">{row.email}</td>
               <td className="px-4 py-2 border text-center">{row.phone}</td>
+              <td className="px-4 py-2 border text-center">{row.role}</td>
               {buttons.length > 0 && (
                 <td className="px-4 py-2 border text-center flex flex-col items-center space-y-1">
                   {buttons.map((Button, buttonIndex) => (
