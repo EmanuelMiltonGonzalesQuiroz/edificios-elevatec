@@ -26,7 +26,17 @@ const Filters = ({ onApplyFilters, onClose }) => {
   };
 
   const applyFilters = () => {
-    onApplyFilters(filters); // Aplica los filtros
+    // Normalizar todos los filtros sensibles a texto para ser insensibles a mayúsculas/minúsculas
+    const normalizedFilters = {
+      ...filters,
+      transactionType: filters.transactionType?.toLowerCase() || '',
+      placeType: filters.placeType?.toLowerCase() || '',
+      currency: filters.currency?.toLowerCase() || '',
+      state: filters.state?.toLowerCase() || '',
+      city: filters.city?.toLowerCase() || '',
+    };
+  
+    onApplyFilters(normalizedFilters); // Aplica los filtros normalizados
     if (typeof onClose === 'function') onClose(); // Cierra el modal solo si onClose es una función válida
   };
 
