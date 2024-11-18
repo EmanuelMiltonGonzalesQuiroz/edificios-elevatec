@@ -13,6 +13,7 @@ import {
 } from '../../services/auth';
 import GoogleButton from './GoogleButton';
 import ToggleAuthMode from './ToggleAuthMode';
+import fondo from '../../assets/images/fondo.jpg'; // Importar la imagen de fondo
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -104,33 +105,43 @@ const LoginForm = () => {
       setError('Error al registrarse con Google.');
     }
   };
-
+ 
   return (
-    <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-      <div className="flex justify-center mb-6">
-        <img src={logo} alt="Logo" className="h-16" />
+    <div
+    className="flex items-center justify-center h-screen"
+    style={{
+        backgroundImage: `url(${fondo})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+        <div className="flex justify-center mb-6">
+          <img src={logo} alt="Logo" className="h-16" />
+        </div>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          {isRegistering ? 'Regístrate' : 'Inicia Sesión'}
+        </h2>
+        <LoginFields
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          handleSubmit={isRegistering ? handleRegister : handleLogin}
+          isRegistering={isRegistering}
+        />
+        <GoogleButton
+          onClick={isRegistering ? handleGoogleRegister : handleGoogleLogin}
+          isRegistering={isRegistering}
+        />
+        <ToggleAuthMode
+          isRegistering={isRegistering}
+          setIsRegistering={setIsRegistering}
+          setError={setError}
+        />
+        {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
       </div>
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-        {isRegistering ? 'Regístrate' : 'Inicia Sesión'}
-      </h2>
-      <LoginFields
-        email={email}
-        setEmail={setEmail}
-        password={password}
-        setPassword={setPassword}
-        handleSubmit={isRegistering ? handleRegister : handleLogin}
-        isRegistering={isRegistering}
-      />
-      <GoogleButton
-        onClick={isRegistering ? handleGoogleRegister : handleGoogleLogin}
-        isRegistering={isRegistering}
-      />
-      <ToggleAuthMode
-        isRegistering={isRegistering}
-        setIsRegistering={setIsRegistering}
-        setError={setError}
-      />
-      {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
     </div>
   );
 };
