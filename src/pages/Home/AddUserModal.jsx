@@ -33,7 +33,6 @@ const AddUserModal = ({ onAddUserSuccess }) => {
             ...baseUser,
             uid: uuidv4(),
             username: `${username} Inmobiliario`,
-            password: "Inmobiliario",
             email:`${email} Inmobiliario`,
             role: 'Inmobiliario',
             ownerUid: mainUserUid, // Propietario del edificio
@@ -42,7 +41,6 @@ const AddUserModal = ({ onAddUserSuccess }) => {
             ...baseUser,
             uid: uuidv4(),
             username: `${username} InmobiliarioPlus`,
-            password: "InmobiliarioPlus",
             email:`${email} InmobiliarioPlus`,
             role: 'Inmobiliario Plus',
             ownerUid: mainUserUid, // Propietario del edificio
