@@ -1,60 +1,69 @@
 import React, { useEffect, useState } from 'react';
-import { FaSave, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaSave } from 'react-icons/fa';
 import { db } from '../../connection/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import Switch from 'react-switch';
-
-const defaultContractTypes = [
-  { label: 'Venta' },
-  { label: 'Alquiler' },
-  { label: 'Anticrético' },
-  { label: 'Preventa' },
-];
-
-const defaultPlaceTypes = [
-  { label: 'Departamento' },
-  { label: 'Edificio' },
-  { label: 'Casa' },
-  { label: 'Local' },
-  { label: 'Oficina' },
-];
+import ContractTypeSettings from '../../components/Settings/ContractTypeSettings';
+import PlaceTypeSettings from '../../components/Settings/PlaceTypeSettings';
 
 const SettingsModal = ({ onClose }) => {
+  const [settings, setSettings] = useState({
+    publishDetail: false,
+  });
   const [contractTypes, setContractTypes] = useState([]);
   const [placeTypes, setPlaceTypes] = useState([]);
-  const [settings, setSettings] = useState({
-    publishDetail: false, // Detalles de publicaciones sin estar logeado
-  });
 
   useEffect(() => {
     const fetchSettings = async () => {
+      const generalSettingsDoc = doc(db, 'settings', 'views_without_login');
       const contractTypesDoc = doc(db, 'settings', 'contractTypes');
       const placeTypesDoc = doc(db, 'settings', 'placeTypes');
-      const generalSettingsDoc = doc(db, 'settings', 'views_without_login');
 
-      const contractSnapshot = await getDoc(contractTypesDoc);
-      const placeSnapshot = await getDoc(placeTypesDoc);
-      const generalSnapshot = await getDoc(generalSettingsDoc);
+      const [generalSnapshot, contractSnapshot, placeSnapshot] = await Promise.all([
+        getDoc(generalSettingsDoc),
+        getDoc(contractTypesDoc),
+        getDoc(placeTypesDoc),
+      ]);
+
+      if (generalSnapshot.exists()) {
+        setSettings(generalSnapshot.data());
+      } else {
+        await setDoc(generalSettingsDoc, { publishDetail: false });
+      }
 
       if (contractSnapshot.exists()) {
-        setContractTypes(contractSnapshot.data().options);
+        const options = contractSnapshot.data().options.map((option) => ({
+          ...option,
+          enabled: option.enabled ?? true,
+        }));
+        setContractTypes(options);
       } else {
+        const defaultContractTypes = [
+          { label: 'Venta', enabled: true },
+          { label: 'Alquiler', enabled: true },
+          { label: 'Anticrético', enabled: true },
+          { label: 'Preventa', enabled: true },
+        ];
         await setDoc(contractTypesDoc, { options: defaultContractTypes });
         setContractTypes(defaultContractTypes);
       }
 
       if (placeSnapshot.exists()) {
-        setPlaceTypes(placeSnapshot.data().options);
+        const options = placeSnapshot.data().options.map((option) => ({
+          ...option,
+          enabled: option.enabled ?? true,
+        }));
+        setPlaceTypes(options);
       } else {
+        const defaultPlaceTypes = [
+          { label: 'Departamento', enabled: true },
+          { label: 'Edificio', enabled: true },
+          { label: 'Casa', enabled: true },
+          { label: 'Local', enabled: true },
+          { label: 'Oficina', enabled: true },
+        ];
         await setDoc(placeTypesDoc, { options: defaultPlaceTypes });
         setPlaceTypes(defaultPlaceTypes);
-      }
-
-      // Configuración de switches generales
-      if (generalSnapshot.exists()) {
-        setSettings(generalSnapshot.data());
-      } else {
-        await setDoc(generalSettingsDoc, { publishDetail: false });
       }
     };
 
@@ -63,16 +72,18 @@ const SettingsModal = ({ onClose }) => {
 
   const handleSave = async () => {
     try {
+      const generalSettingsDoc = doc(db, 'settings', 'views_without_login');
       const contractTypesDoc = doc(db, 'settings', 'contractTypes');
       const placeTypesDoc = doc(db, 'settings', 'placeTypes');
-      const generalSettingsDoc = doc(db, 'settings', 'views_without_login');
 
-      await setDoc(contractTypesDoc, { options: contractTypes });
-      await setDoc(placeTypesDoc, { options: placeTypes });
-      await setDoc(generalSettingsDoc, settings);
+      await Promise.all([
+        setDoc(generalSettingsDoc, settings),
+        setDoc(contractTypesDoc, { options: contractTypes }),
+        setDoc(placeTypesDoc, { options: placeTypes }),
+      ]);
 
       if (typeof onClose === 'function') {
-        onClose(); // Cierra el modal después de guardar exitosamente
+        onClose();
       }
     } catch (error) {
       console.error('Error al guardar configuraciones:', error);
@@ -86,30 +97,16 @@ const SettingsModal = ({ onClose }) => {
     }));
   };
 
-  const handleAddContractType = () => {
-    setContractTypes([...contractTypes, { label: '' }]);
-  };
-
-  const handleAddPlaceType = () => {
-    setPlaceTypes([...placeTypes, { label: '' }]);
-  };
-
-  const handleRemoveContractType = (index) => {
-    setContractTypes(contractTypes.filter((_, i) => i !== index));
-  };
-
-  const handleRemovePlaceType = (index) => {
-    setPlaceTypes(placeTypes.filter((_, i) => i !== index));
-  };
-
   return (
     <div className="min-w-[40vw]">
-      {/* Configuración de Vistas Sin Login */}
-      <h3 className="font-semibold text-gray-700 mb-2">Vistas de lo Usuarios sin Inicio de Sesión</h3>
+      <h3 className="font-semibold text-gray-700 mb-2">
+        Vistas de los Usuarios sin Inicio de Sesión
+      </h3>
       <div className="space-y-4 mb-6">
-        {/* Lista de switches configurables */}
         <div className="flex items-center space-x-4">
-          <span className="text-gray-600 font-medium">Detalles de las Publicaciones</span>
+          <span className="text-gray-600 font-medium">
+            Detalles de las Publicaciones
+          </span>
           <Switch
             onChange={() => handleSwitchChange('publishDetail')}
             checked={settings.publishDetail}
@@ -121,65 +118,16 @@ const SettingsModal = ({ onClose }) => {
         </div>
       </div>
 
-      {/* Ajustes de tipos de contrato */}
-      <div className="space-y-2">
-        <h3 className="font-semibold text-gray-700">Tipos de Contrato</h3>
-        {contractTypes.map((type, index) => (
-          <div key={index} className="flex items-center space-x-2">
-            <input
-              type="text"
-              placeholder="Label"
-              value={type.label}
-              onChange={(e) =>
-                setContractTypes((prev) =>
-                  prev.map((item, i) => (i === index ? { ...item, label: e.target.value } : item))
-                )
-              }
-              className="w-full p-1 border rounded"
-            />
-            <button onClick={() => handleRemoveContractType(index)} className="text-red-500">
-              <FaTrash />
-            </button>
-          </div>
-        ))}
-        <button
-          onClick={handleAddContractType}
-          className="flex items-center text-blue-500 mt-2"
-        >
-          <FaPlus className="mr-1" /> Añadir Tipo de Contrato
-        </button>
-      </div>
+      <ContractTypeSettings
+        contractTypes={contractTypes}
+        setContractTypes={setContractTypes}
+      />
 
-      {/* Ajustes de tipos de edificio */}
-      <div className="space-y-2 mt-4">
-        <h3 className="font-semibold text-gray-700">Tipos de Edificio</h3>
-        {placeTypes.map((type, index) => (
-          <div key={index} className="flex items-center space-x-2">
-            <input
-              type="text"
-              placeholder="Label"
-              value={type.label}
-              onChange={(e) =>
-                setPlaceTypes((prev) =>
-                  prev.map((item, i) => (i === index ? { ...item, label: e.target.value } : item))
-                )
-              }
-              className="w-full p-1 border rounded"
-            />
-            <button onClick={() => handleRemovePlaceType(index)} className="text-red-500">
-              <FaTrash />
-            </button>
-          </div>
-        ))}
-        <button
-          onClick={handleAddPlaceType}
-          className="flex items-center text-blue-500 mt-2"
-        >
-          <FaPlus className="mr-1" /> Añadir Tipo de Edificio
-        </button>
-      </div>
+      <PlaceTypeSettings
+        placeTypes={placeTypes}
+        setPlaceTypes={setPlaceTypes}
+      />
 
-      {/* Botón Guardar */}
       <div className="flex justify-center mt-4">
         <button
           onClick={handleSave}

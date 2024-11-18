@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../../connection/firebase';
-import { collection, query, where, getDocs} from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Carousel } from 'react-responsive-carousel';
 import { FaMapMarkerAlt, FaHome, FaMapSigns, FaBuilding } from 'react-icons/fa';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -19,6 +19,35 @@ const PostFeed = ({ filters }) => {
   const fetchPublications = useCallback(async () => {
     setLoading(true);
     try {
+      // Fetch enabled transactionTypes and placeTypes from settings
+      const settingsRef = collection(db, 'settings');
+      const [contractTypesDoc, placeTypesDoc] = await Promise.all([
+        getDocs(query(settingsRef, where('__name__', '==', 'contractTypes'))),
+        getDocs(query(settingsRef, where('__name__', '==', 'placeTypes'))),
+      ]);
+
+      const enabledContractTypes = [];
+      const enabledPlaceTypes = [];
+
+      if (!contractTypesDoc.empty) {
+        const contractTypesData = contractTypesDoc.docs[0].data().options;
+        contractTypesData.forEach((type) => {
+          if (type.enabled) {
+            enabledContractTypes.push(type.label.toLowerCase());
+          }
+        });
+      }
+
+      if (!placeTypesDoc.empty) {
+        const placeTypesData = placeTypesDoc.docs[0].data().options;
+        placeTypesData.forEach((type) => {
+          if (type.enabled) {
+            enabledPlaceTypes.push(type.label.toLowerCase());
+          }
+        });
+      }
+
+      // Build initial query
       let q;
 
       if (currentUser && currentUser?.role !== 'Administrador') {
@@ -27,29 +56,79 @@ const PostFeed = ({ filters }) => {
         q = query(collection(db, 'publications'));
       }
 
-      if (filters.transactionType) q = query(q, where('transactionType', '==', filters.transactionType));
-      if (filters.rooms) q = query(q, where('rooms', '==', filters.rooms));
-      if (filters.bathrooms) q = query(q, where('bathrooms', '==', filters.bathrooms));
+      // Apply filters to the query
+      if (filters.transactionType) {
+        q = query(q, where('transactionType', '==', filters.transactionType));
+      }
+      if (filters.rooms) {
+        q = query(q, where('rooms', '==', filters.rooms));
+      }
+      if (filters.bathrooms) {
+        q = query(q, where('bathrooms', '==', filters.bathrooms));
+      }
 
       const querySnapshot = await getDocs(q);
-      const publicationsData = querySnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((doc) => {
+
+      // Map publications data
+      const publicationsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Fetch uploader user data
+      const uploaderIds = [...new Set(publicationsData.map((pub) => pub.uploadedBy))];
+      const userDocsPromises = uploaderIds.map((uid) => getDocs(query(collection(db, 'users'), where('uid', '==', uid))));
+      const userDocsSnapshots = await Promise.all(userDocsPromises);
+
+      const userMap = {};
+      userDocsSnapshots.forEach((userSnapshot) => {
+        if (!userSnapshot.empty) {
+          const userData = userSnapshot.docs[0].data();
+          userMap[userData.uid] = userData;
+        }
+      });
+
+      // Filter publications
+      const filteredPublications = publicationsData
+        .filter((pub) => {
+          const uploader = userMap[pub.uploadedBy];
+          if (!uploader || uploader.state === 'inactive' || uploader.state === 'deleted') {
+            return false;
+          }
+
+          const transactionType = pub.transactionType?.toLowerCase() || '';
+          const placeType = pub.placeType?.toLowerCase() || '';
+
+          if (!enabledContractTypes.includes(transactionType) || !enabledPlaceTypes.includes(placeType)) {
+            return false;
+          }
+
+          return true;
+        })
+        .filter((pub) => {
+          // Apply additional filters from the 'filters' prop
           const meetsPrice =
-            (!filters.priceMin || doc.amount >= filters.priceMin) &&
-            (!filters.priceMax || doc.amount <= filters.priceMax);
+            (!filters.priceMin || parseFloat(pub.amount) >= parseFloat(filters.priceMin)) &&
+            (!filters.priceMax || parseFloat(pub.amount) <= parseFloat(filters.priceMax));
           const meetsArea =
-            (!filters.areaMin || doc.area >= filters.areaMin) &&
-            (!filters.areaMax || doc.area <= filters.areaMax);
-          return meetsPrice && meetsArea;
+            (!filters.areaMin || parseFloat(pub.area) >= parseFloat(filters.areaMin)) &&
+            (!filters.areaMax || parseFloat(pub.area) <= parseFloat(filters.areaMax));
+          const meetsCurrency =
+            !filters.currency || pub.currency.toLowerCase() === filters.currency.toLowerCase();
+          const meetsState =
+            !filters.state || pub.state.toLowerCase() === filters.state.toLowerCase();
+          const meetsCity =
+            !filters.city || pub.city.toLowerCase() === filters.city.toLowerCase();
+
+          return meetsPrice && meetsArea && meetsCurrency && meetsState && meetsCity;
         })
         .sort((a, b) => {
           if (a.state === 'priority' && b.state !== 'priority') return -1;
           if (a.state !== 'priority' && b.state === 'priority') return 1;
-          return new Date(b.uploadedAt) - new Date(a.uploadedAt); // Ordenar por fecha
+          return new Date(b.uploadedAt) - new Date(a.uploadedAt);
         });
 
-      setPublications(publicationsData);
+      setPublications(filteredPublications);
     } catch (error) {
       console.error('Error al obtener publicaciones:', error);
     } finally {
@@ -62,8 +141,8 @@ const PostFeed = ({ filters }) => {
   }, [fetchPublications]);
 
   const handlePublicationClick = async (publication) => {
-    const permission = await checkSetting("publishDetail")
-    if (!currentUser && permission === false ) {
+    const permission = await checkSetting('publishDetail');
+    if (!currentUser && permission === false) {
       navigate('/login');
       return;
     }
@@ -78,7 +157,7 @@ const PostFeed = ({ filters }) => {
       {publications.length === 0 ? (
         <p className="text-center text-gray-500">No hay publicaciones disponibles.</p>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {publications.map((pub) => (
             <div
               key={pub.id}
@@ -87,38 +166,33 @@ const PostFeed = ({ filters }) => {
                   handlePublicationClick(pub);
                 }
               }}
-              className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl cursor-pointer "
+              className="border rounded-lg p-4 shadow-lg bg-white transition-transform transform hover:scale-105 hover:shadow-2xl cursor-pointer"
               style={{ height: '400px' }}
             >
               <div className="max-h-[320px] overflow-auto">
-                <h3 className="text-x font-bold mb-2 text-gray-800">{pub.name}</h3>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">{pub.name}</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4 ">
-                {/* Primera columna con la información */}
-                
+              <div className="grid grid-cols-2 gap-4">
+                {/* Información */}
                 <div className="overflow-auto max-h-[280px]">
-                  
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
                     <FaMapMarkerAlt className="w-4 h-4 flex-shrink-0" />
                     <p>{pub.city}</p>
                   </div>
-
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
                     <FaBuilding className="w-4 h-4 flex-shrink-0" />
                     <p>Inmueble: {pub.placeType}</p>
                   </div>
-
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
                     <FaMapSigns className="w-4 h-4 flex-shrink-0" />
                     <p>Dirección: {pub.address}</p>
                   </div>
-
                   <div className="flex items-center space-x-2 text-gray-600 mb-1">
                     <FaHome className="w-4 h-4 flex-shrink-0" />
                     <p>Contrato: {pub.transactionType}</p>
                   </div>
                 </div>
-                {/* Segunda columna con el carrusel */}
+                {/* Carrusel */}
                 <div>
                   {pub.imageUrls && pub.imageUrls.length > 0 ? (
                     <Carousel
@@ -132,7 +206,11 @@ const PostFeed = ({ filters }) => {
                     >
                       {pub.imageUrls.map((url, index) => (
                         <div key={url} className="cursor-pointer">
-                          <img src={url} alt={`Imagen ${index + 1}`} className="object-cover rounded-lg max-h-[280px] min-h-[280px]" />
+                          <img
+                            src={url}
+                            alt={`Imagen ${index + 1}`}
+                            className="object-cover rounded-lg max-h-[280px] min-h-[280px]"
+                          />
                         </div>
                       ))}
                     </Carousel>
@@ -147,11 +225,13 @@ const PostFeed = ({ filters }) => {
       )}
 
       {selectedPublication && (
-        <PostDetailsModal 
-          publication={selectedPublication} 
-          onClose={() => setSelectedPublication(null)} 
+        <PostDetailsModal
+          publication={selectedPublication}
+          onClose={() => setSelectedPublication(null)}
           onDeletePublication={(deletedId) => {
-            setPublications((prevPublications) => prevPublications.filter(pub => pub.id !== deletedId));
+            setPublications((prevPublications) =>
+              prevPublications.filter((pub) => pub.id !== deletedId)
+            );
             setSelectedPublication(null);
           }}
         />
