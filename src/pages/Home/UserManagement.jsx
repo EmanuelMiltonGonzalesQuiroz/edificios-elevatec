@@ -73,70 +73,31 @@ const UserManagement = () => {
       </div>
 
       <Table
-        columnTitles={['Nombre', 'Email', 'Teléfono', 'Rol']}
-        data={filteredUsers}
-        hasIndex={true}
-        rowClass={(user) => (user.state === 'inactive' ? 'bg-red-200' : '')}
-        buttons={[
-          (props) => (
-            <EditButton
-              {...props}
-              onUpdateSuccess={handleUpdateSuccess}
-              collectionName="users"
-              fieldsConfig={[
-                {
-                  label: 'Nombre',
-                  name: 'username',
-                  type: 'input',
-                  editable: true,
-                  validation: /^[a-zA-Z\s]+$/,
-                },
-                {
-                  label: 'Email',
-                  name: 'email',
-                  type: 'input',
-                  editable: false,
-                },
-                {
-                  label: 'Teléfono',
-                  name: 'phone',
-                  type: 'input',
-                  editable: true,
-                  validation: /^[0-9]+$/,
-                },
-                {
-                  label: 'Rol',
-                  name: 'role',
-                  type: 'select',
-                  options: ['Usuario', 'Administrador', 'Gerencia', 'Inmobiliario', 'Inmobiliario Plus', 'Edificio'],
-                  editable: currentUser?.role !== 'Edificio', // Usuarios "Edificio" no pueden editar roles
-                },
-              ]}
-            />
-          ),
-          (props) =>
-            (props.row.state === 'active' || !props.row.state) ? (
-              <DisableButton
-                {...props}
-                collectionName="users"
-                onDisableSuccess={handleDisableSuccess}
-              />
-            ) : (
-              <EnableButton
-                {...props}
-                collectionName="users"
-                onEnableSuccess={handleEnableSuccess}
-              />
-            ),
-          (props) => (
-            <DeleteButton
-              {...props}
-              collectionName="users"
-              onDeleteSuccess={handleDeleteSuccess}
-            />
-          ),
-        ]}
-      />
+  columnTitles={[
+    { key: 'username', title: 'Nombre', sortable: true },
+    { key: 'email', title: 'Email', sortable: true },
+    { key: 'phone', title: 'Teléfono', sortable: true },
+    { key: 'role', title: 'Rol', sortable: true },
+    { key: 'password', title: 'Contraseña', sortable: false }, // Contraseña visible
+  ]}
+  data={filteredUsers} // Muestra los datos tal como están, incluyendo la contraseña
+  hasIndex={true}
+  buttons={[
+    (props) => <EditButton {...props} onUpdateSuccess={handleUpdateSuccess} collectionName="users" />,
+    (props) =>
+      props.row.state === 'active' || !props.row.state ? (
+        <DisableButton {...props} collectionName="users" onDisableSuccess={handleDisableSuccess} />
+      ) : (
+        <EnableButton {...props} collectionName="users" onEnableSuccess={handleEnableSuccess} />
+      ),
+    (props) => <DeleteButton {...props} collectionName="users" onDeleteSuccess={handleDeleteSuccess} />,
+  ]}
+  onSort={(key, direction) => {
+    console.log(`Ordenar por ${key} en dirección ${direction}`);
+  }}
+/>
+
+
 
       {/* Modal para agregar usuario */}
       <Modal
@@ -151,3 +112,4 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+ 
